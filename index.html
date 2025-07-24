@@ -1,0 +1,2260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Garden Frame Adder</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome CDN for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts for Playfair Display and Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-background: #FFFBEB;
+            --color-primary-text: #7E603B;
+            --color-accent-gold: #D4AF37;
+            --color-light-gold: #FCE38A;
+            --color-dark-brown: #5A432A;
+        }
+
+        html, body {
+            height: 100%; /* Ensure html and body take full viewport height */
+            margin: 0;
+            padding: 0;
+            /* Removed overflow: hidden; to enable scrolling */
+        }
+
+        body {
+            font-family: 'Playfair Display', serif; /* Changed font to Playfair Display */
+            background-color: var(--color-background); /* Using CSS variable */
+            background-image: url('background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Changed from center to flex-start to ensure content starts from the top */
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            backdrop-filter: blur(5px); /* Added blur effect to the background */
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9); /* Changed to rgba for background translucency */
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .main-content-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .main-content-area {
+                flex-direction: row;
+                flex-wrap: wrap; /* Added to allow wrapping on larger screens */
+                align-items: flex-start;
+                justify-content: center;
+                gap: 30px;
+            }
+        }
+
+        /* New container for canvas and its preview text */
+        .canvas-preview-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 500px; /* Match canvas max-width */
+        }
+        @media (min-width: 768px) {
+            .canvas-preview-container {
+                flex: 1 1 500px; /* Allow shrinking, prefer 500px base */
+                max-width: 500px; /* Maintain max-width for the canvas container */
+            }
+        }
+
+        canvas {
+            border: none;
+            border-radius: 8px;
+            background-color: #FFFDE7; /* Still a light off-white for canvas background */
+            max-width: 100%;
+            height: auto;
+            display: block;
+            touch-action: none;
+            cursor: grab;
+            flex-shrink: 0;
+            width: 100%; /* Ensure canvas always takes 100% of its parent's width */
+            aspect-ratio: 1 / 1; /* Maintain square aspect ratio */
+        }
+
+        canvas.grabbing {
+            cursor: grabbing;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        .input-group label {
+            font-weight: 600;
+            color: var(--color-primary-text);
+            margin-bottom: 10px;
+            font-size: 1.25em; /* Changed font size to match headers */
+            font-family: 'Playfair Display', serif; /* Explicitly set font */
+        }
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--color-accent-gold);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 2px 6px rgba(212, 175, 55, 0.3);
+            font-family: 'Inter', sans-serif; /* Applied Inter font */
+        }
+        .file-input-wrapper:hover {
+            background-color: var(--color-dark-brown);
+            transform: translateY(-1px);
+        }
+        .file-input-wrapper i {
+            margin-right: 8px;
+        }
+
+        .action-button {
+            background-color: var(--color-accent-gold);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 2px 6px rgba(212, 175, 55, 0.3);
+            font-weight: 600;
+            border: none;
+            margin-top: 10px; /* Default margin-top for action buttons */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif; /* Applied Inter font */
+        }
+        .action-button:hover {
+            background-color: var(--color-dark-brown);
+            transform: translateY(-1px);
+        }
+        .action-button:disabled {
+            background-color: var(--color-light-gold);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        .action-button i {
+            margin-right: 8px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            inset: 0; /* Shorthand for top:0; right:0; bottom:0; left:0; */
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            /* Ensure modal itself can scroll if content pushes it */
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch; /* For smoother scrolling on iOS */
+        }
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            /* Centering using absolute positioning and transform */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.3s ease; 
+            /* Added for content overflow within modal */
+            max-height: 90vh; /* Limit content height to 90% of viewport height */
+            overflow-y: auto; /* Enable internal scrolling for content */
+            -webkit-overflow-scrolling: touch; /* For smoother scrolling on iOS */
+        }
+        .modal-button {
+            background-color: var(--color-dark-brown);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 2px 6px rgba(90, 67, 42, 0.3);
+            font-weight: 600;
+            border: none;
+            width: 100%;
+            margin-bottom: 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif; /* Applied Inter font */
+        }
+        .modal-button:hover {
+            background-color: var(--color-primary-text);
+            transform: translateY(-1px);
+        }
+        .modal-button:last-child {
+            margin-bottom: 0;
+        }
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 15px;
+            font-size: 1.6em;
+            cursor: pointer;
+            color: var(--color-light-gold);
+            transition: color 0.2s ease;
+        }
+        .modal-close:hover {
+            color: var(--color-accent-gold);
+        }
+
+        /* Right Sidebar for Controls (now below canvas) */
+        .controls-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 500px; /* Match canvas max-width */
+            margin-top: 20px; /* Space below canvas */
+        }
+
+        /* Tabs Styling */
+        .tabs-header {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--color-light-gold);
+        }
+        .tab-button {
+            flex-grow: 1;
+            padding: 12px 20px;
+            background-color: #F8F8F8;
+            color: var(--color-primary-text);
+            font-weight: 600;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        .tab-button:hover {
+            background-color: #EFEFEF;
+        }
+        .tab-button.active {
+            background-color: #FFFFFF;
+            border-bottom-color: var(--color-accent-gold);
+            color: var(--color-dark-brown);
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+        }
+        .tab-content {
+            display: none;
+            background-color: #FFFFFF;
+            border-radius: 0 0 12px 12px; /* Rounded bottom corners */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+        }
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* Control Group Styling (within tabs) */
+        .control-group {
+            background-color: transparent; /* No background for groups inside tabs */
+            border-radius: 0;
+            box-shadow: none;
+            padding: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 1;
+        }
+        .control-group h3 {
+            margin-bottom: 15px;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+        }
+
+
+        /* New responsive control buttons group */
+        /* This class is now applied to the new wrapper flex div */
+        .control-buttons-group {
+            display: flex;
+            flex-wrap: nowrap; /* Ensure buttons stay in a single row */
+            justify-content: center;
+            gap: 4px; /* Reduced gap between the button-label-pairs for tighter fit */
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        /* New styles for the sub-buttons within each group */
+        .control-sub-button {
+            background-color: var(--color-light-gold);
+            color: var(--color-primary-text);
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+            box-shadow: 0 1px 4px rgba(252, 227, 138, 0.4);
+            flex-grow: 1; /* Allow buttons to grow and fill available space */
+            flex-shrink: 1; /* Explicitly allow shrinking */
+            flex-basis: 0; /* Let flexbox determine initial size based on content and available space */
+            height: 44px; /* Consistent size for icon-only buttons */
+            font-size: 1.2em; /* Larger icon size */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            min-width: 30px; /* Further reduced min-width to allow more aggressive shrinking */
+        }
+
+        .control-sub-button:hover {
+            background-color: var(--color-accent-gold);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(212, 175, 55, 0.5);
+        }
+
+        .control-sub-button:disabled {
+            background-color: #FEF3C7;
+            color: var(--color-light-gold);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Ensure the individual button-label-pair divs can shrink */
+        .control-buttons-group > div {
+            flex-shrink: 1;
+            flex-basis: 0; /* Allow flex items to shrink below their content size */
+            min-width: 0; /* Important for preventing overflow in flex containers */
+        }
+
+
+        /* Media query for landscape/larger screens for the main button groups wrapper */
+        @media (min-width: 768px) { /* Adjust breakpoint as needed, md: is 768px in Tailwind */
+            .control-buttons-group {
+                justify-content: space-between;
+            }
+        }
+        /* Style for text-only buttons within control groups */
+        .control-group .text-button {
+            padding: 10px 20px; /* More padding for text buttons */
+            font-size: 1em; /* Standard font size for text */
+            min-width: unset; /* Remove min-width constraint for text buttons */
+            height: auto; /* Allow height to adjust to content */
+        }
+
+        /* Style for the labels below button groups */
+        .button-group-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95em; /* Slightly larger than 0.9em for better readability */
+            color: var(--color-primary-text);
+            margin-top: 8px; /* Space between buttons and label */
+            text-align: center;
+            width: 100%; /* Ensure it spans the width of its parent flex item */
+            font-weight: 500; /* Slightly less bold than main labels */
+        }
+
+        /* Sliders specific styles */
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin-top: 5px; /* Reduced margin as it's inside control-group */
+        }
+        .slider-group label {
+            font-weight: 600;
+            color: var(--color-primary-text);
+            margin-bottom: 5px;
+            font-size: 0.95em;
+            font-family: 'Inter', sans-serif; /* Applied Inter font */
+        }
+        .slider-group input[type="range"] {
+            width: 90%;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--color-light-gold);
+            outline: none;
+            opacity: 0.9;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+        .slider-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--color-accent-gold);
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(212, 175, 55, 0.4);
+        }
+        .slider-group input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--color-accent-gold);
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Custom Toggle Switch Styles */
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 28px;
+            -webkit-appearance: none;
+            appearance: none;
+            background-color: var(--color-light-gold);
+            border-radius: 14px;
+            outline: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle-switch:checked {
+            background-color: var(--color-accent-gold);
+        }
+
+        .toggle-switch::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background-color: #FFFFFF;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch:checked::before {
+            transform: translateX(20px);
+        }
+
+        /* Webcam specific styles */
+        .webcam-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+        }
+        .webcam-section video {
+            width: 100%;
+            max-width: 320px;
+            height: auto;
+            background-color: #000;
+            border-radius: 10px;
+            display: block;
+            transform-origin: center center;
+        }
+        .webcam-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+        .webcam-controls button {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            background-color: var(--color-accent-gold);
+            color: white;
+            min-width: 100px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif; /* Applied Inter font */
+        }
+        .webcam-controls button:hover {
+            background-color: var(--color-dark-brown);
+            transform: translateY(-1px);
+        }
+        .webcam-controls button:disabled {
+            background-color: var(--color-light-gold);
+            color: var(--color-accent-gold);
+            cursor: not-allowed;
+            transform: none;
+        }
+        #hiddenCanvas {
+            display: none;
+        }
+
+        /* Generic Popup styles */
+        .popup-modal {
+            position: fixed;
+            inset: 0; /* Shorthand for top:0; right:0; bottom:0; left:0; */
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            /* Ensure modal itself can scroll if content pushes it */
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* For smoother scrolling on iOS */
+        }
+        .popup-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .popup-content {
+            background-color: #FFFFFF;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            /* Centering using absolute positioning and transform */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.3s ease; 
+            /* Added for content overflow within modal */
+            max-height: 90vh; /* Limit content height to 90% of viewport height */
+            overflow-y: auto; /* Enable internal scrolling for content */
+            -webkit-overflow-scrolling: touch; /* For smoother scrolling on iOS */
+        }
+        .popup-close {
+            position: absolute;
+            top: 12px;
+            right: 15px;
+            font-size: 1.6em;
+            cursor: pointer;
+            color: var(--color-light-gold);
+            transition: color 0.2s ease;
+        }
+        .popup-close:hover {
+            color: var(--color-accent-gold);
+        }
+        .popup-text {
+            color: var(--color-primary-text);
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        .popup-countdown {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--color-accent-gold);
+            margin-top: 15px;
+        }
+        .popup-caption-box {
+            width: 100%;
+            height: 80px;
+            border: 1px solid var(--color-light-gold);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 15px;
+            resize: vertical;
+            font-family: 'Playfair Display', serif;
+            font-size: 0.9em;
+            color: var(--color-primary-text);
+            background-color: #FFFBF0;
+        }
+        .popup-copy-button {
+            background-color: var(--color-accent-gold);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-weight: 600;
+            border: none;
+            margin-top: 15px;
+            font-family: 'Inter', sans-serif; /* Applied Inter font */
+        }
+        .popup-copy-button:hover {
+            background-color: var(--color-dark-brown);
+        }
+        /* Specific styles for text elements to use Inter font */
+        .canvas-preview-container label,
+        .canvas-preview-container p,
+        .slider-group select { /* Added select to apply Inter font to dropdown */
+            font-family: 'Inter', sans-serif;
+        }
+        /* Remove margin-top for specific action buttons */
+        #finalizePictureBtn,
+        #downloadBtn {
+            margin-top: 0; /* Remove default margin-top */
+        }
+
+        /* Loading Overlay Styles */
+        #loadingOverlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(255, 255, 255, 0.75); /* Use rgba for background opacity */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        #loadingOverlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        /* Loader for Key.png */
+        #loadingSpinnerImage {
+            width: auto; /* Allow natural width */
+            height: auto; /* Allow natural height */
+            max-width: 96px; /* Limit max size */
+            max-height: 96px; /* Limit max size */
+            object-fit: contain; /* Ensure image fits without stretching */
+            margin-bottom: 16px; /* mb-4 */
+            animation: spin 1.5s linear infinite; /* Apply spin animation */
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Caption Customization Modal Specific Styles */
+        .caption-modal-content {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            /* Centering using absolute positioning and transform */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.3s ease; 
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .caption-modal-content label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--color-primary-text);
+            font-family: 'Inter', sans-serif;
+            text-align: left;
+            width: 100%;
+        }
+        .caption-modal-content input[type="text"],
+        .caption-modal-content select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid var(--color-light-gold);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            color: var(--color-primary-text);
+            background-color: #FFFDE7;
+        }
+        .caption-modal-content button {
+            width: auto; /* Allow button to size based on content */
+            padding: 12px 25px;
+            margin-top: 10px;
+        }
+        /* Center copy to clipboard button */
+        #popupCopyButton {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Styles for the main logo */
+        #mainLogo {
+            width: 100%;
+            max-width: 250px; /* Adjust as needed for desired max size */
+            height: auto;
+            margin-bottom: 20px;
+            transition: opacity 0.3s ease; /* Smooth transition for opacity change */
+            display: block; /* Ensure it's a block element for margin auto to work */
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-75 flex flex-col items-center justify-center z-[9999] opacity-0 invisible transition-opacity duration-300">
+        <img id="loadingSpinnerImage" src="Key.png" alt="Loading Spinner">
+        <p class="text-xl font-semibold text-gray-700" id="loadingMessage">Loading resources...</p>
+    </div>
+
+    <div class="container">
+        <!-- Main Logo -->
+        <img id="mainLogo" src="Logo.png" alt="Secret Garden Logo">
+
+        <div class="input-group">
+            <label for="imageUploadTrigger">Add Photo to Frame:</label>
+            <div id="imageUploadTrigger" class="file-input-wrapper">
+                <i class="fas fa-upload"></i>
+                <span>Choose Photo</span>
+            </div>
+            <!-- Hidden file input for gallery selection -->
+            <input type="file" id="selectGalleryInput" accept="image/*" style="display: none;">
+        </div>
+
+        <div class="main-content-area flex-col md:flex-row">
+            <!-- New container for canvas and preview message -->
+            <div class="canvas-preview-container">
+                <canvas id="imageCanvas"></canvas>
+                <!-- Facebook Profile View Switch - Moved here -->
+                <div class="flex items-center justify-center mt-4 mb-2">
+                    <label for="facebookProfileSwitch" class="font-semibold mr-3" style="color: var(--color-primary-text);">Facebook Profile View:</label>
+                    <input type="checkbox" id="facebookProfileSwitch" class="toggle-switch">
+                </div>
+            </div>
+
+            <!-- New Controls Container with Tabs -->
+            <div class="controls-container">
+                <div class="tabs-header">
+                    <button class="tab-button active" data-tab="scalePosition">Scale and Position</button>
+                    <button class="tab-button" data-tab="imageAdjustments">Image Adjustments</button>
+                </div>
+
+                <div id="scalePositionTab" class="tab-content active">
+                    <div class="control-group">
+                        <div class="control-buttons-group"> <!-- New wrapper for the three button groups -->
+
+                            <!-- Zoom Group -->
+                            <div class="flex flex-col items-center flex-1 min-w-0">
+                                <div class="flex gap-2 w-full justify-center">
+                                    <button id="zoomInBtn" disabled aria-label="Zoom In" class="control-sub-button"><i class="fas fa-search-plus"></i></button>
+                                    <button id="zoomOutBtn" disabled aria-label="Zoom Out" class="control-sub-button"><i class="fas fa-search-minus"></i></button>
+                                </div>
+                                <p class="button-group-label">Zoom</p>
+                            </div>
+
+                            <!-- Rotate Group -->
+                            <div class="flex flex-col items-center flex-1 min-w-0">
+                                <div class="flex gap-2 w-full justify-center">
+                                    <button id="rotateLeftBtn" disabled aria-label="Rotate Left" class="control-sub-button"><i class="fas fa-undo"></i></button>
+                                    <button id="rotateRightBtn" disabled aria-label="Rotate Rotate" class="control-sub-button"><i class="fas fa-redo"></i></button>
+                                </div>
+                                <p class="button-group-label">Rotate</p>
+                            </div>
+
+                            <!-- Flip Group -->
+                            <div class="flex flex-col items-center flex-1 min-w-0">
+                                <div class="flex gap-2 w-full justify-center">
+                                    <button id="flipHorizontalBtn" disabled aria-label="Flip Horizontal" class="control-sub-button"><i class="fas fa-arrows-alt-h"></i></button>
+                                    <button id="flipVerticalBtn" disabled aria-label="Flip Vertical" class="control-sub-button"><i class="fas fa-arrows-alt-v"></i></button>
+                                </div>
+                                <p class="button-group-label">Flip</p>
+                            </div>
+
+                        </div>
+                        <button id="revertPhotoBtn" class="action-button mt-4 text-button" disabled>RESET</button>
+                    </div>
+                </div>
+
+                <div id="imageAdjustmentsTab" class="tab-content">
+                    <div class="control-group">
+                        <div class="slider-group">
+                            <label for="filterSelect">Select Adjustment:</label>
+                            <select id="filterSelect" class="w-full p-2 border rounded-lg mb-4" style="background-color: #FFFDE7; color: var(--color-primary-text); border-color: var(--color-light-gold);" disabled>
+                                <option value="brightness">Brightness</option>
+                                <option value="contrast">Contrast</option>
+                                <option value="saturation">Saturation</option>
+                            </select>
+
+                            <label for="filterSlider"><span id="filterLabel">Brightness</span>: <span id="filterValue">100%</span></label>
+                            <input type="range" id="filterSlider" min="0" max="200" value="100" disabled>
+                        </div>
+                        <button id="revertFiltersBtn" class="action-button mt-4 text-button" disabled>RESET</button>
+                    </div>
+                </div>
+                <!-- Buttons below tabs -->
+                <div class="flex flex-col gap-4 mt-4 w-full">
+                    <button id="downloadBtn" class="action-button text-button" disabled>
+                        Download Framed Picture
+                    </button>
+                    <button id="addCaptionBtn" class="action-button text-button" disabled>
+                        Add Caption for DP Blast
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden image element for the frame -->
+    <!-- IMPORTANT: For the frame to be HD, 'Frame.png' must be a high-resolution image file. -->
+    <!-- This image is used internally by JavaScript to draw the frame onto the canvas. -->
+    <!-- It is set to display: none; in CSS and should not be visible on the page directly. -->
+    <img id="frameImage" src="Frame.png" alt="Secret Garden Frame" style="display: none;">
+    <!-- New hidden image element for Facebook View overlay -->
+    <img id="facebookViewImage" src="Facebook_View.png" alt="Facebook View Overlay" style="display: none;">
+    <!-- Hidden image element for the loading spinner -->
+    <img id="keyImage" src="Key.png" alt="Key Image" style="display: none;">
+
+
+    <!-- Photo Source Modal -->
+    <div id="photoSourceModal" class="modal">
+        <div class="modal-content">
+            <span id="closeModal" class="modal-close">&times;</span>
+            <h2 class="text-2xl font-bold" style="color: var(--color-primary-text);">Choose Photo Source</h2>
+
+            <button id="showWebcamOptionsBtn" class="modal-button mb-4">
+                <i class="fas fa-camera"></i>
+                Take a Picture
+            </button>
+            <button id="selectGalleryBtn" class="modal-button">
+                <i class="fas fa-images"></i>
+                Select from Gallery
+            </button>
+
+            <!-- Webcam Options Section (initially hidden) -->
+            <div id="webcamOptionsSection" class="webcam-section mt-6 hidden">
+                <h3 class="text-xl font-bold" style="color: var(--color-primary-text);">Camera Controls</h3>
+                <div style="position: relative; width: 100%; max-width: 320px;">
+                    <video id="webcamVideo" muted autoplay="autoplay" playsinline="playsinline" webkit-playsinline></video>
+                </div>
+                <div class="webcam-controls">
+                    <button id="captureWebcamPhotoBtn" disabled><i class="fas fa-camera-retro"></i> Capture</button>
+                    <button id="flipWebcamCaptureBtn" disabled><i class="fas fa-arrows-rotate"></i> Flip Image</button>
+                    <button id="flipCameraButton" disabled><i class="fas fa-sync-alt"></i> Flip Camera</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic Popup Modal -->
+    <div id="genericPopupModal" class="popup-modal">
+        <div class="popup-content">
+            <span id="popupCloseBtn" class="popup-close">&times;</span>
+            <p id="popupMessage" class="popup-text"></p>
+            <div id="popupCountdown" class="popup-countdown"></div>
+            <textarea id="popupCaptionBox" class="popup-caption-box hidden" readonly></textarea>
+            <button id="popupCopyButton" class="popup-copy-button hidden">Copy to Clipboard</button>
+        </div>
+    </div>
+
+    <!-- Caption Customization Modal -->
+    <div id="captionCustomizationModal" class="modal">
+        <div class="caption-modal-content">
+            <span id="closeCaptionModal" class="modal-close">&times;</span>
+            <h2 class="text-2xl font-bold mb-4" style="color: var(--color-primary-text);">Customize Your Caption</h2>
+            
+            <label for="captionNameInput">Name or nickname:</label>
+            <input type="text" id="captionNameInput" placeholder="Enter your name or nickname">
+
+            <label for="captionCourseSelect">Course:</label>
+            <select id="captionCourseSelect" class="w-full p-2 border rounded-lg mb-4" style="background-color: #FFFDE7; color: var(--color-primary-text); border-color: var(--color-light-gold);">
+                <option value="">Select your course</option>
+                <option value="BS Agriculture">BS Agriculture</option>
+                <option value="BS Agricultural Biotechnology">BS Agricultural Biotechnology</option>
+                <option value="BS Agricultural Chemistry">BS Agricultural Chemistry</option>
+                <option value="BS Food Science and Technology">BS Food Science and Technology</option>
+            </select>
+
+            <button id="generateCaptionBtn" class="action-button text-button">Generate Caption</button>
+        </div>
+    </div>
+
+    <!-- Hidden canvas for capturing webcam frames -->
+    <canvas id="hiddenCanvas"></canvas>
+
+    <script>
+        // DOM Elements
+        const imageUploadTrigger = document.getElementById('imageUploadTrigger');
+        const selectGalleryInput = document.getElementById('selectGalleryInput');
+        const imageCanvas = document.getElementById('imageCanvas');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const addCaptionBtn = document.getElementById('addCaptionBtn'); // New: Add Caption button
+        const frameImage = document.getElementById('frameImage');
+        const facebookViewImage = document.getElementById('facebookViewImage'); // New: Facebook View Image
+        const keyImage = document.getElementById('keyImage'); // New: Key Image for loading spinner
+        const ctx = imageCanvas.getContext('2d');
+
+        const photoSourceModal = document.getElementById('photoSourceModal');
+        const closeModal = document.getElementById('closeModal');
+        const showWebcamOptionsBtn = document.getElementById('showWebcamOptionsBtn');
+        const selectGalleryBtn = document.getElementById('selectGalleryBtn');
+        const webcamOptionsSection = document.getElementById('webcamOptionsSection');
+
+        const webcamVideo = document.getElementById("webcamVideo");
+        const captureWebcamPhotoBtn = document.getElementById("captureWebcamPhotoBtn");
+        const hiddenCanvas = document.getElementById("hiddenCanvas");
+
+        const flipWebcamCaptureBtn = document.getElementById('flipWebcamCaptureBtn');
+        const flipCameraButton = document.getElementById('flipCameraButton');
+
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const rotateLeftBtn = document.getElementById('rotateLeftBtn');
+        const rotateRightBtn = document.getElementById('rotateRightBtn');
+        const flipHorizontalBtn = document.getElementById('flipHorizontalBtn');
+        const flipVerticalBtn = document.getElementById('flipVerticalBtn');
+        const revertPhotoBtn = document.getElementById('revertPhotoBtn');
+        const revertFiltersBtn = document.getElementById('revertFiltersBtn');
+
+        // Filter controls
+        const filterSelect = document.getElementById('filterSelect');
+        const filterSlider = document.getElementById('filterSlider');
+        const filterLabel = document.getElementById('filterLabel');
+        const filterValue = document.getElementById('filterValue');
+
+        // Generic Popup Elements
+        const genericPopupModal = document.getElementById('genericPopupModal');
+        const popupCloseBtn = document.getElementById('popupCloseBtn');
+        const popupMessage = document.getElementById('popupMessage');
+        const popupCountdown = document.getElementById('popupCountdown');
+        const popupCaptionBox = document.getElementById('popupCaptionBox');
+        const popupCopyButton = document.getElementById('popupCopyButton');
+
+        // New Facebook Profile View elements
+        const facebookProfileSwitch = document.getElementById('facebookProfileSwitch');
+
+        // Loading Overlay Elements
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const loadingSpinnerImage = document.getElementById('loadingSpinnerImage'); // Reference to the Key.png image
+
+        // Tab Elements
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // Caption Customization Modal Elements
+        const captionCustomizationModal = document.getElementById('captionCustomizationModal');
+        const closeCaptionModal = document.getElementById('closeCaptionModal');
+        const captionNameInput = document.getElementById('captionNameInput');
+        const captionCourseSelect = document.getElementById('captionCourseSelect');
+        const generateCaptionBtn = document.getElementById('generateCaptionBtn');
+
+        // Main Logo element
+        const mainLogo = document.getElementById('mainLogo');
+
+
+        // Global Variables
+        let userImage = new Image(); // This will hold the original, high-res user image
+        let originalImageState = { // Store original state for revert, relative to preview canvas
+            x: 0,
+            y: 0,
+            scale: 1,
+            rotation: 0,
+            flipH: 1,
+            flipV: 1
+        };
+
+        let frameLoaded = false;
+        let placeholderLoaded = false;
+        let facebookViewImageLoaded = false; // New: Flag for Facebook View image
+        let keyImageLoaded = false; // New: Flag for Key.png image
+        let currentImageSource = 'placeholder'; // 'placeholder', 'uploaded', 'webcam', 'finalized'
+        let scaleFactor = 1; // Relative to preview canvas
+        let imageX = 0;      // Relative to preview canvas
+        let imageY = 0;      // Relative to preview canvas
+        let rotationAngle = 0;
+        let flipH = 1;
+        let flipV = 1;
+
+        let brightness = 100;
+        let contrast = 100;
+        let saturation = 100;
+
+        let initialPinchDistance = 0;
+        let initialScaleFactorOnPinch = 1;
+        let isPinching = false;
+
+        let isDragging = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        let showGrid = false;
+        let gridTimer = null;
+
+        let frameOpacity = 1;
+        let targetFrameOpacity = 1;
+        let animationFrameId = null;
+
+        let imageCapture;
+        let localStream; // Stores the MediaStream object for the webcam
+        let cameraDevices = []; // Stores available camera devices
+        let webcamCurrentFacingMode = 'user'; // 'user' for front camera, 'environment' for rear
+
+        // Added for camera permission persistence
+        const CAMERA_PERMISSION_KEY = 'cameraPermissionStatus';
+        let cameraPermissionStatus = localStorage.getItem(CAMERA_PERMISSION_KEY); // 'granted', 'denied', or null
+
+        let webcamPreviewFlip = -1; // Changed to -1 for default mirror mode
+
+        let isFacebookProfileMode = false; // New global variable for the Facebook profile view
+        let circleOverlayOpacity = 0; // New global variable for the black overlay opacity
+        let targetCircleOverlayOpacity = 0; // New global variable for the target black overlay opacity
+
+        // Hardcoded data from Database.txt
+        const eventTargetDate = new Date("July 26, 2025 19:00:00").getTime(); // July 26, 2025 | 7:00 PM
+        const enableDownload = true; // Changed to true to enable download
+        const eventCaptionText = "Hello this is a trial only. Copy me. Lorem ipsum dolor"; // Hello this is a trial only. Copy me. Lorem ipsum dolor
+
+        let countdownIntervalId; // To store the interval for the countdown
+
+        // --- Utility Functions ---
+
+        // Function to show a generic message box (replaces multiple inline message box creations)
+        function showMessageBox(message, isError = false) {
+            const messageBox = document.createElement('div');
+            messageBox.style.cssText = `
+                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                z-index: 1000; text-align: center; font-family: 'Playfair Display', serif;
+                color: ${isError ? 'var(--color-accent-gold)' : '#333'}; /* Using CSS variable for error color */
+                max-width: 350px; width: 90%;
+            `;
+            document.body.appendChild(messageBox);
+            messageBox.innerHTML = `
+                <p class="mb-4">${message}</p>
+                <button id="closeMessageBox" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">OK</button>
+            `;
+            document.getElementById('closeMessageBox').addEventListener('click', () => {
+                document.body.removeChild(messageBox);
+            });
+        }
+
+        // Function to show a generic popup message
+        function showPopup(message, showCountdown = false, showCaptionBox = false, caption = '', targetDateForCountdown = null) {
+            popupMessage.textContent = message;
+            popupCountdown.style.display = showCountdown ? 'block' : 'none';
+            popupCaptionBox.style.display = showCaptionBox ? 'block' : 'none';
+            popupCopyButton.style.display = showCaptionBox ? 'block' : 'none';
+
+            if (showCaptionBox) {
+                popupCaptionBox.value = caption;
+            }
+
+            if (showCountdown && targetDateForCountdown) {
+                // Clear any existing countdown interval for this popup
+                if (countdownIntervalId) {
+                    clearInterval(countdownIntervalId);
+                }
+                // Start a new countdown specifically for the popup
+                countdownIntervalId = setInterval(() => {
+                    const now = new Date().getTime();
+                    const distance = targetDateForCountdown - now;
+
+                    if (distance < 0) {
+                        popupCountdown.textContent = "The event has commenced!";
+                        clearInterval(countdownIntervalId);
+                        return;
+                    }
+
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    popupCountdown.textContent = `Countdown: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+                }, 1000);
+            } else {
+                popupCountdown.textContent = ''; // Clear countdown text if not showing
+                if (countdownIntervalId) {
+                    clearInterval(countdownIntervalId); // Ensure interval is cleared
+                    countdownIntervalId = null;
+                }
+            }
+
+            genericPopupModal.classList.add('show');
+        }
+
+        // Function to hide the generic popup message
+        function hidePopup() {
+            genericPopupModal.classList.remove('show');
+            if (countdownIntervalId) {
+                clearInterval(countdownIntervalId);
+                countdownIntervalId = null;
+            }
+        }
+
+        // Function to show the photo source selection modal
+        function showPhotoSourceModal() {
+            photoSourceModal.classList.add('show');
+            webcamOptionsSection.classList.add('hidden'); // Hide webcam section initially
+            showWebcamOptionsBtn.style.display = 'block'; // Show webcam button
+            selectGalleryBtn.style.display = 'block'; // Show gallery button
+            stopWebcam(); // Always stop webcam when modal is opened to reset state
+            setWebcamControlButtonsState(false); // Disable webcam controls
+            webcamPreviewFlip = -1; // Reset live video flip to mirror mode for next camera session
+            applyWebcamTransforms(); // Clear any transforms on video element
+        }
+
+        // Function to hide the photo source selection modal
+        function hidePhotoSourceModal() {
+            photoSourceModal.classList.remove('show');
+            stopWebcam(); // Stop webcam when modal is closed
+        }
+
+        // Function to enable/disable control buttons for the main canvas image
+        function setControlButtonsState(enabled) {
+            zoomInBtn.disabled = !enabled;
+            zoomOutBtn.disabled = !enabled;
+            rotateLeftBtn.disabled = !enabled;
+            rotateRightBtn.disabled = !enabled;
+            flipHorizontalBtn.disabled = !enabled;
+            flipVerticalBtn.disabled = !enabled;
+            revertPhotoBtn.disabled = !enabled;
+
+            filterSelect.disabled = !enabled; // Enable/disable filter dropdown
+            filterSlider.disabled = !enabled; // Enable/disable filter slider
+            revertFiltersBtn.disabled = !enabled;
+
+            downloadBtn.disabled = !enabled;
+            addCaptionBtn.disabled = !enabled; // Enable/disable new Add Caption button
+            facebookProfileSwitch.disabled = !enabled;
+        }
+
+        // Function to enable/disable control buttons for the webcam video
+        function setWebcamControlButtonsState(enabled) {
+            captureWebcamPhotoBtn.disabled = !enabled;
+            flipWebcamCaptureBtn.disabled = !enabled;
+            // Only enable flipCameraButton if multiple cameras are detected
+            flipCameraButton.disabled = !(enabled && cameraDevices.length > 1);
+        }
+
+        // --- Loading Overlay Functions ---
+        function showLoading(message) {
+            loadingMessage.textContent = message;
+            loadingOverlay.classList.add('visible');
+        }
+
+        function hideLoading() {
+            loadingOverlay.classList.remove('visible');
+        }
+
+        // --- Event Listeners ---
+        imageUploadTrigger.addEventListener('click', showPhotoSourceModal);
+        closeModal.addEventListener('click', hidePhotoSourceModal);
+        photoSourceModal.addEventListener('click', (e) => {
+            if (e.target === photoSourceModal) { // Close if clicked outside content
+                hidePhotoSourceModal();
+            }
+        });
+
+        popupCloseBtn.addEventListener('click', hidePopup);
+        genericPopupModal.addEventListener('click', (e) => {
+            if (e.target === genericPopupModal) {
+                hidePopup();
+            }
+        });
+
+        popupCopyButton.addEventListener('click', () => {
+            popupCaptionBox.select();
+            document.execCommand('copy');
+            // Provide visual feedback (optional)
+            const originalText = popupCopyButton.textContent;
+            popupCopyButton.textContent = "Copied!";
+            setTimeout(() => {
+                popupCopyButton.textContent = originalText;
+            }, 1500);
+        });
+
+        // Function to handle playing the webcam stream
+        async function playWebcam() {
+            console.log("playWebcam called. localStream:", localStream, "active:", localStream ? localStream.active : 'N/A');
+            if (localStream && localStream.active) {
+                console.log("Re-using active localStream.");
+                webcamVideo.srcObject = localStream;
+                webcamVideo.play();
+                applyWebcamTransforms();
+                setWebcamControlButtonsState(true);
+            } else {
+                console.log("Requesting new camera permission and stream.");
+                await requestCameraPermissionAndPlay();
+            }
+        }
+
+        showWebcamOptionsBtn.addEventListener('click', async () => {
+            console.log("Show Webcam Options button clicked.");
+            webcamOptionsSection.classList.remove('hidden');
+            showWebcamOptionsBtn.style.display = 'none';
+            selectGalleryBtn.style.display = 'none';
+            
+            webcamVideo.style.display = "block";
+            webcamVideo.srcObject = null;
+
+            await playWebcam();
+        });
+
+        selectGalleryBtn.addEventListener('click', () => {
+            console.log("Select from Gallery button clicked.");
+            selectGalleryInput.click();
+            hidePhotoSourceModal();
+        });
+
+        // Listen for changes on the hidden file input for gallery
+        selectGalleryInput.addEventListener('change', handleImageUpload);
+
+        // Helper function for download button logic
+        function handleDownloadAction() {
+            if (!userImage || !frameLoaded || !userImage.src || currentImageSource === 'placeholder') {
+                showMessageBox("Please upload a picture or take one with the webcam first!");
+                return;
+            }
+
+            showLoading("Generating your photo..."); // Updated loading message
+            // Use a timeout to allow the loading screen to render before heavy canvas operations
+            setTimeout(() => {
+                const link = document.createElement('a');
+                link.download = 'CAFSFC_DPBlast.png'; // Renamed download file
+                link.href = drawFinalImage(); // Do NOT include Facebook overlay for download
+                link.click();
+                hideLoading();
+            }, 10); // Small delay
+        }
+
+        downloadBtn.addEventListener('click', handleDownloadAction);
+
+        // Event listener for Add Caption button
+        addCaptionBtn.addEventListener('click', () => {
+            if (!userImage || !frameLoaded || !userImage.src || currentImageSource === 'placeholder') {
+                showMessageBox("Please upload a picture or take one with the webcam first to add a caption!");
+                return;
+            }
+            showCaptionCustomizationModal();
+        });
+
+
+        // --- Core Image Handling Functions ---
+        function setImageOnCanvas(imgSrc, initialFlipH = 1) {
+            console.log("setImageOnCanvas called with imgSrc:", imgSrc.substring(0, 30) + "...", "initialFlipH:", initialFlipH);
+            showLoading("Processing photo..."); // Show loading when new image is set
+            const img = new Image();
+            img.onload = () => {
+                userImage = img; // userImage now holds the full resolution image
+                currentImageSource = 'uploaded';
+                
+                // Set preview canvas dimensions to match frame image's natural resolution
+                // This makes the preview HD internally, scaled down by CSS for display
+                imageCanvas.width = frameImage.naturalWidth;
+                imageCanvas.height = frameImage.naturalHeight;
+                
+                // Calculate initial fit for the user image on the HD preview canvas
+                let imgAspectRatio = userImage.naturalWidth / userImage.naturalHeight;
+                let initialDrawWidthPreview, initialDrawHeightPreview;
+
+                if (imgAspectRatio > imageCanvas.width / imageCanvas.height) {
+                    initialDrawWidthPreview = imageCanvas.width;
+                    initialDrawHeightPreview = imageCanvas.width / imgAspectRatio;
+                } else {
+                    initialDrawHeightPreview = imageCanvas.height;
+                    initialDrawWidthPreview = imageCanvas.height * imgAspectRatio;
+                }
+
+                // Initial state for transformations, relative to HD preview canvas dimensions
+                originalImageState = {
+                    x: (imageCanvas.width - initialDrawWidthPreview) / 2,
+                    y: (imageCanvas.height - initialDrawHeightPreview) / 2,
+                    scale: 1, // This scale is relative to the initial fit on the HD preview canvas
+                    rotation: 0,
+                    flipH: initialFlipH,
+                    flipV: 1,
+                    canvasWidth: imageCanvas.width, // Store canvas dimensions with the state
+                    canvasHeight: imageCanvas.height
+                };
+
+                // Apply initial state to current transformation variables
+                scaleFactor = originalImageState.scale;
+                rotationAngle = originalImageState.rotation;
+                flipH = originalImageState.flipH;
+                flipV = originalImageState.flipV;
+                imageX = originalImageState.x;
+                imageY = originalImageState.y;
+
+                frameOpacity = 1;
+                targetFrameOpacity = 1;
+                circleOverlayOpacity = 0;
+                targetCircleOverlayOpacity = 0;
+                facebookProfileSwitch.checked = false;
+
+                // Reset image adjustments to default and update UI
+                brightness = 100;
+                contrast = 100;
+                saturation = 100;
+                filterSelect.value = 'brightness'; // Set dropdown to brightness
+                filterSlider.value = 100; // Set slider to 100
+                updateFilterSliderUI(); // Update label and value for the slider
+
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+
+                drawPreviewImage(); // Draw to the visible preview canvas
+                setControlButtonsState(true); // Enable controls after image is loaded
+                hideLoading(); // Hide loading after image is set and drawn
+            };
+            img.onerror = () => {
+                hideLoading(); // Hide loading if image fails to load
+                showMessageBox("Failed to load image. Please try another file.", true);
+            };
+            img.src = imgSrc;
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    setImageOnCanvas(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // --- Opacity Animation Function ---
+        function animateCanvasEffects() {
+            const step = 0.05;
+            const tolerance = 0.01;
+
+            let frameOpacityReached = false;
+            let circleOpacityReached = false;
+
+            if (Math.abs(frameOpacity - targetFrameOpacity) < tolerance) {
+                frameOpacity = targetFrameOpacity;
+                frameOpacityReached = true;
+            } else {
+                if (frameOpacity < targetFrameOpacity) {
+                    frameOpacity += step;
+                } else {
+                    frameOpacity -= step;
+                }
+            }
+
+            if (Math.abs(circleOverlayOpacity - targetCircleOverlayOpacity) < tolerance) {
+                circleOverlayOpacity = targetCircleOverlayOpacity;
+                circleOpacityReached = true;
+            } else {
+                if (circleOverlayOpacity < targetCircleOverlayOpacity) {
+                    circleOverlayOpacity += step;
+                } else {
+                    circleOverlayOpacity -= step;
+                }
+            }
+
+            drawPreviewImage();
+
+            if (frameOpacityReached && circleOpacityReached) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            } else {
+                animationFrameId = requestAnimationFrame(animateCanvasEffects);
+            }
+        }
+
+        // --- Interaction Event Handlers (Shared logic for grid visibility and frame opacity) ---
+        function startInteraction() {
+            if (currentImageSource !== 'placeholder') {
+                showGrid = true;
+                if (gridTimer) clearTimeout(gridTimer);
+
+                targetFrameOpacity = 0.5;
+                if (animationFrameId === null) {
+                    animationFrameId = requestAnimationFrame(animateCanvasEffects);
+                }
+            }
+        }
+
+        function endInteraction() {
+            if (currentImageSource !== 'placeholder') {
+                if (gridTimer) clearTimeout(gridTimer);
+                
+                gridTimer = setTimeout(() => {
+                    showGrid = false;
+                    targetFrameOpacity = 1;
+                    if (animationFrameId === null) {
+                        animationFrameId = requestAnimationFrame(animateCanvasEffects);
+                    } else {
+                    }
+                    drawPreviewImage();
+                }, 150);
+            }
+        }
+
+        // --- Touch Event Listeners (Pinch-to-zoom & Drag) ---
+        imageCanvas.addEventListener('touchstart', (e) => {
+            if (!userImage || !frameLoaded || currentImageSource === 'placeholder') return; 
+
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                isPinching = true;
+                initialPinchDistance = getDistance(e.touches[0], e.touches[1]);
+                initialScaleFactorOnPinch = scaleFactor;
+                startInteraction();
+            } else if (e.touches.length === 1) {
+                e.preventDefault();
+                isDragging = true;
+                lastX = e.touches[0].clientX;
+                lastY = e.touches[0].clientY;
+                imageCanvas.classList.add('grabbing');
+                startInteraction();
+            }
+        });
+
+        imageCanvas.addEventListener('touchmove', (e) => {
+            if (!userImage || !frameLoaded || currentImageSource === 'placeholder') return;
+
+            if (isPinching && e.touches.length === 2) {
+                e.preventDefault();
+                const currentPinchDistance = getDistance(e.touches[0], e.touches[1]);
+                const newScale = initialScaleFactorOnPinch * (currentPinchDistance / initialPinchDistance);
+
+                const clampedNewScale = Math.max(0.5, Math.min(newScale, 2.0));
+
+                // Calculate mouseX and mouseY relative to the *internal* canvas dimensions
+                const rect = imageCanvas.getBoundingClientRect();
+                const scaleX = imageCanvas.width / rect.width;
+                const scaleY = imageCanvas.height / rect.height;
+
+                const touch1X = (e.touches[0].clientX - rect.left) * scaleX;
+                const touch1Y = (e.touches[0].clientY - rect.top) * scaleY;
+                const touch2X = (e.touches[1].clientX - rect.left) * scaleX;
+                const touch2Y = (e.touches[1].clientY - rect.top) * scaleY;
+                const centerX = (touch1X + touch2X) / 2;
+                const centerY = (touch1Y + touch2Y) / 2;
+
+                imageX = centerX - ((centerX - imageX) * (clampedNewScale / scaleFactor));
+                imageY = centerY - ((centerY - imageY) * (clampedNewScale / scaleFactor));
+
+                scaleFactor = clampedNewScale;
+                
+                console.log(`Pinch: newScale=${scaleFactor.toFixed(2)}, imageX=${imageX.toFixed(2)}, imageY=${imageY.toFixed(2)}`);
+
+                drawPreviewImage();
+            } else if (isDragging && e.touches.length === 1) {
+                e.preventDefault();
+                const rect = imageCanvas.getBoundingClientRect();
+                const scaleX = imageCanvas.width / rect.width;
+                const scaleY = imageCanvas.height / rect.height;
+
+                const currentX = e.touches[0].clientX * scaleX;
+                const currentY = e.touches[0].clientY * scaleY;
+                const dx = currentX - lastX;
+                const dy = currentY - lastY;
+
+                imageX += dx;
+                imageY += dy;
+
+                lastX = currentX;
+                lastY = currentY;
+                drawPreviewImage();
+            }
+        });
+
+        imageCanvas.addEventListener('touchend', (e) => {
+            isPinching = false;
+            isDragging = false;
+            imageCanvas.classList.remove('grabbing');
+            if (e.touches.length < 2) {
+                initialPinchDistance = 0;
+            }
+            endInteraction();
+        });
+
+        // --- Mouse Event Listeners (Scroll-to-zoom & Drag) ---
+        imageCanvas.addEventListener('mousedown', (e) => {
+            if (!userImage || !frameLoaded || currentImageSource === 'placeholder') return; 
+
+            if (e.button === 0) {
+                isDragging = true;
+                const rect = imageCanvas.getBoundingClientRect();
+                const scaleX = imageCanvas.width / rect.width;
+                const scaleY = imageCanvas.height / rect.height;
+                lastX = e.clientX * scaleX;
+                lastY = e.clientY * scaleY;
+                imageCanvas.classList.add('grabbing');
+                startInteraction();
+            }
+        });
+
+        imageCanvas.addEventListener('mousemove', (e) => {
+            if (!userImage || !frameLoaded || currentImageSource === 'placeholder') return;
+            if (isDragging) {
+                const rect = imageCanvas.getBoundingClientRect();
+                const scaleX = imageCanvas.width / rect.width;
+                const scaleY = imageCanvas.height / rect.height;
+
+                const currentX = e.clientX * scaleX;
+                const currentY = e.clientY * scaleY;
+                const dx = currentX - lastX;
+                const dy = currentY - lastY;
+
+                imageX += dx;
+                imageY += dy;
+
+                lastX = currentX;
+                lastY = currentY;
+                drawPreviewImage();
+            }
+        });
+
+        imageCanvas.addEventListener('mouseup', () => {
+            isDragging = false;
+            imageCanvas.classList.remove('grabbing');
+            endInteraction();
+        });
+
+        imageCanvas.addEventListener('mouseleave', () => {
+            isDragging = false;
+            imageCanvas.classList.remove('grabbing');
+            endInteraction();
+        });
+
+        imageCanvas.addEventListener('wheel', (e) => {
+            if (userImage && frameLoaded && currentImageSource !== 'placeholder') { 
+                e.preventDefault();
+                startInteraction();
+
+                const zoomSensitivity = 0.05;
+                const zoomDirection = e.deltaY < 0 ? 1 : -1;
+
+                let newScale = scaleFactor + (zoomDirection * zoomSensitivity);
+
+                newScale = Math.max(0.5, Math.min(newScale, 2.0));
+
+                const rect = imageCanvas.getBoundingClientRect();
+                const scaleX = imageCanvas.width / rect.width;
+                const scaleY = imageCanvas.height / rect.height;
+
+                const mouseX = (e.clientX - rect.left) * scaleX;
+                const mouseY = (e.clientY - rect.top) * scaleY;
+
+                imageX = mouseX - ((mouseX - imageX) * (newScale / scaleFactor));
+                imageY = mouseY - ((mouseY - imageY) * (newScale / scaleFactor));
+
+                scaleFactor = newScale;
+                drawPreviewImage();
+                endInteraction();
+            }
+        });
+
+        // --- Control Button Event Listeners ---
+        zoomInBtn.addEventListener('click', () => {
+            if (currentImageSource !== 'placeholder') {
+                scaleFactor = Math.min(scaleFactor + 0.1, 2.0);
+                drawPreviewImage();
+            }
+        });
+
+        zoomOutBtn.addEventListener('click', () => {
+            if (currentImageSource !== 'placeholder') {
+                scaleFactor = Math.max(scaleFactor - 0.1, 0.5);
+                drawPreviewImage();
+            }
+        });
+
+        rotateLeftBtn.addEventListener('click', () => {
+            if (currentImageSource !== 'placeholder') {
+                rotationAngle = (rotationAngle - 45 + 360) % 360;
+                drawPreviewImage();
+            }
+        });
+
+        rotateRightBtn.addEventListener('click', () => {
+            if (currentImageSource !== 'placeholder') {
+                rotationAngle = (rotationAngle + 45) % 360;
+                drawPreviewImage();
+            }
+        });
+
+        flipHorizontalBtn.addEventListener('click', () => {
+            if (currentImageSource !== 'placeholder') {
+                flipH *= -1;
+                drawPreviewImage();
+            }
+        });
+
+        flipVerticalBtn.addEventListener('click', () => {
+            if (currentImageSource !== 'placeholder') {
+                flipV *= -1;
+                drawPreviewImage();
+            }
+        });
+
+        revertPhotoBtn.addEventListener('click', () => {
+            if (currentImageSource !== 'placeholder') {
+                scaleFactor = originalImageState.scale;
+                rotationAngle = originalImageState.rotation;
+                flipH = originalImageState.flipH;
+                flipV = originalImageState.flipV;
+                imageX = originalImageState.x;
+                imageY = originalImageState.y;
+                drawPreviewImage();
+            }
+        });
+
+        revertFiltersBtn.addEventListener('click', () => {
+            if (currentImageSource !== 'placeholder') {
+                brightness = 100;
+                contrast = 100;
+                saturation = 100;
+                filterSelect.value = 'brightness'; // Reset dropdown to brightness
+                filterSlider.value = 100; // Reset slider to 100
+                updateFilterSliderUI(); // Update UI to reflect reset
+                drawPreviewImage();
+            }
+        });
+
+        // --- Filter Slider and Dropdown Logic ---
+        function updateFilterSliderUI() {
+            const selectedFilter = filterSelect.value;
+            let currentValue = 100; // Default value
+
+            switch (selectedFilter) {
+                case 'brightness':
+                    currentValue = brightness;
+                    filterLabel.textContent = 'Brightness';
+                    break;
+                case 'contrast':
+                    currentValue = contrast;
+                    filterLabel.textContent = 'Contrast';
+                    break;
+                case 'saturation':
+                    currentValue = saturation;
+                    filterLabel.textContent = 'Saturation';
+                    break;
+            }
+            filterSlider.value = currentValue;
+            filterValue.textContent = `${currentValue}%`;
+        }
+
+        filterSelect.addEventListener('change', updateFilterSliderUI);
+
+        filterSlider.addEventListener('input', () => {
+            const selectedFilter = filterSelect.value;
+            const value = parseInt(filterSlider.value);
+
+            switch (selectedFilter) {
+                case 'brightness':
+                    brightness = value;
+                    break;
+                case 'contrast':
+                    contrast = value;
+                    break;
+                case 'saturation':
+                    saturation = value;
+                    break;
+            }
+            filterValue.textContent = `${value}%`;
+            drawPreviewImage();
+        });
+
+        // --- Facebook Profile Switch Event Listener ---
+        facebookProfileSwitch.addEventListener('change', () => {
+            isFacebookProfileMode = facebookProfileSwitch.checked;
+            drawPreviewImage();
+        });
+
+
+        // Helper function to calculate distance between two touch points
+        function getDistance(touch1, touch2) {
+            const dx = touch1.clientX - touch2.clientX;
+            const dy = touch1.clientY - touch2.clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        // Function to draw the grid overlay
+        function drawGrid(targetCtx, canvasWidth, canvasHeight) {
+            if (!showGrid) return;
+
+            targetCtx.save();
+            targetCtx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            targetCtx.lineWidth = 1;
+
+            targetCtx.beginPath();
+            targetCtx.moveTo(canvasWidth / 3, 0);
+            targetCtx.lineTo(canvasWidth / 3, canvasHeight);
+            targetCtx.moveTo(canvasWidth * 2 / 3, 0);
+            targetCtx.lineTo(canvasWidth * 2 / 3, canvasHeight);
+            targetCtx.stroke();
+
+            targetCtx.beginPath();
+            targetCtx.moveTo(0, canvasHeight / 3);
+            targetCtx.lineTo(canvasWidth, canvasHeight / 3);
+            targetCtx.moveTo(0, canvasHeight * 2 / 3);
+            targetCtx.lineTo(canvasWidth, canvasHeight * 2 / 3);
+            targetCtx.stroke();
+
+            targetCtx.restore();
+        }
+
+
+        // Ensure the canvas is responsive
+        function resizeCanvas() {
+            // The imageCanvas's internal resolution is fixed to frameImage.naturalWidth/Height
+            // CSS handles the scaling for display.
+            // We just need to redraw to ensure everything looks correct after a display size change.
+            drawPreviewImage();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // --- Main Logo Scroll Fade Effect ---
+        function handleScrollFade() {
+            const scrollY = window.scrollY;
+            const fadeStart = 50; // Pixels scrolled before fading starts
+            const fadeEnd = 200;  // Pixels scrolled when logo is fully faded
+
+            if (scrollY <= fadeStart) {
+                mainLogo.style.opacity = 1;
+            } else if (scrollY >= fadeEnd) {
+                mainLogo.style.opacity = 0;
+            } else {
+                mainLogo.style.opacity = 1 - ((scrollY - fadeStart) / (fadeEnd - fadeStart));
+            }
+        }
+        window.addEventListener('scroll', handleScrollFade);
+
+
+        window.onload = async function() {
+            showLoading("Loading resources...");
+            
+            const loadImage = (imageElement, isPlaceholder = false, isFacebookView = false, isKeyImage = false) => {
+                return new Promise((resolve, reject) => {
+                    imageElement.onload = () => {
+                        if (isPlaceholder) placeholderLoaded = true;
+                        else if (isFacebookView) facebookViewImageLoaded = true;
+                        else if (isKeyImage) keyImageLoaded = true;
+                        else frameLoaded = true;
+                        console.log(`${isPlaceholder ? 'Placeholder' : isFacebookView ? 'Facebook View' : isKeyImage ? 'Key Image' : 'Frame'} image loaded.`);
+                        resolve();
+                    };
+                    imageElement.onerror = () => {
+                        const fileName = imageElement.src.split('/').pop();
+                        const errorMessage = `Failed to load ${isPlaceholder ? 'placeholder' : isFacebookView ? 'Facebook View overlay' : isKeyImage ? 'Key Image' : 'secret garden frame'} image: '${fileName}'. Please ensure this file is present in the same directory as this HTML file.`;
+                        console.error(errorMessage);
+                        showMessageBox(errorMessage, true);
+                        reject(new Error(errorMessage)); // Reject the promise to propagate the error
+                    };
+                    if (imageElement.complete && imageElement.naturalHeight !== 0) {
+                        if (isPlaceholder) placeholderLoaded = true;
+                        else if (isFacebookView) facebookViewImageLoaded = true;
+                        else if (isKeyImage) keyImageLoaded = true;
+                        else frameLoaded = true;
+                        console.log(`${isPlaceholder ? 'Placeholder' : isFacebookView ? 'Facebook View' : isKeyImage ? 'Key Image' : 'Frame'} image already loaded (cached).`);
+                        resolve();
+                    }
+                });
+            };
+
+            try {
+                // Load all necessary images first
+                await Promise.all([
+                    loadImage(frameImage),
+                    loadImage(facebookViewImage, false, true),
+                    loadImage(keyImage, false, false, true) // Load Key.png
+                ]);
+                
+                // Set initial internal resolution of the preview canvas to match the frame
+                imageCanvas.width = frameImage.naturalWidth;
+                imageCanvas.height = frameImage.naturalHeight;
+                originalImageState.canvasWidth = imageCanvas.width; // Store for transformation calculations
+                originalImageState.canvasHeight = imageCanvas.height;
+
+                const savedImageData = localStorage.getItem('finalizedImageData');
+                const savedTransformState = localStorage.getItem('finalizedImageTransformState');
+
+                if (savedImageData && savedTransformState) {
+                    console.log("Loading finalized picture and state from local storage.");
+                    currentImageSource = 'finalized';
+                    
+                    const parsedTransformState = JSON.parse(savedTransformState);
+                    imageX = parsedTransformState.x;
+                    imageY = parsedTransformState.y;
+                    scaleFactor = parsedTransformState.scale;
+                    rotationAngle = parsedTransformState.rotation;
+                    flipH = parsedTransformState.flipH;
+                    flipV = parsedTransformState.flipV;
+                    brightness = parsedTransformState.brightness;
+                    contrast = parsedTransformState.contrast;
+                    saturation = parsedTransformState.saturation;
+
+                    // Update filter UI based on loaded values
+                    filterSelect.value = 'brightness'; // Default to brightness on load
+                    updateFilterSliderUI(); // Update UI to reflect loaded values
+
+                    originalImageState = {
+                        x: imageX,
+                        y: imageY,
+                        scale: scaleFactor,
+                        rotation: rotationAngle,
+                        flipH: flipH,
+                        flipV: flipV,
+                        canvasWidth: imageCanvas.width, 
+                        canvasHeight: imageCanvas.height
+                    };
+                    userImage.src = savedImageData;
+                    await loadImage(userImage);
+                    setControlButtonsState(true); // Enable controls if a finalized image is loaded
+                } else {
+                    userImage.src = 'Placeholder.jpg'; // Default placeholder
+                    await loadImage(userImage, true);
+                    currentImageSource = 'placeholder';
+                    setControlButtonsState(false); // Controls remain disabled for placeholder
+                }
+
+                drawPreviewImage(); // Initial draw after all resources are loaded
+                hideLoading(); // Hide loading after initial load
+                handleScrollFade(); // Set initial logo opacity based on scroll position
+            } catch (error) {
+                console.error("Initialization error:", error);
+                hideLoading(); // Hide loading even if there's an error
+                // The loadImage function already shows a message box for image loading errors
+                // No need for a generic message here unless it's a different kind of error
+            }
+        };
+
+
+        // Function to draw to the PREVIEW canvas
+        function drawPreviewImage() {
+            if (!userImage || !frameLoaded || !userImage.src || (currentImageSource === 'placeholder' && !placeholderLoaded)) { 
+                console.log("Waiting for images to load or userImage.src is empty/placeholder not loaded for preview...");
+                return;
+            }
+
+            const canvasWidth = imageCanvas.width;
+            const canvasHeight = imageCanvas.height;
+            const targetCtx = ctx; // Use the main canvas context
+
+            targetCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            // --- 1. Draw Blurred Background ---
+            if (currentImageSource !== 'placeholder') {
+                targetCtx.save();
+                targetCtx.filter = 'blur(10px)';
+
+                let sourceX = 0;
+                let sourceY = 0;
+                let sourceWidth = userImage.naturalWidth;
+                let sourceHeight = userImage.naturalHeight;
+
+                const imageAspectRatio = userImage.naturalWidth / userImage.naturalHeight;
+                const canvasAspectRatio = canvasWidth / canvasHeight;
+
+                if (imageAspectRatio > canvasAspectRatio) {
+                    sourceWidth = userImage.naturalHeight * canvasAspectRatio;
+                    sourceX = (userImage.naturalWidth - sourceWidth) / 2;
+                } else {
+                    sourceHeight = userImage.naturalWidth / canvasAspectRatio;
+                    sourceY = (userImage.naturalHeight - sourceHeight) / 2;
+                }
+
+                targetCtx.drawImage(userImage, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvasWidth, canvasHeight);
+                targetCtx.restore();
+            }
+
+            // --- 2. Draw Main User Image (with filters and transformations) ---
+            targetCtx.save();
+
+            targetCtx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`;
+
+            // Calculate initial fit for the user image on the PREVIEW canvas
+            let imgAspectRatio = userImage.naturalWidth / userImage.naturalHeight;
+            let initialDrawWidthPreview, initialDrawHeightPreview;
+
+            if (imgAspectRatio > canvasWidth / canvasHeight) {
+                initialDrawWidthPreview = canvasWidth;
+                initialDrawHeightPreview = canvasWidth / imgAspectRatio;
+            } else {
+                initialDrawHeightPreview = canvasHeight;
+                initialDrawWidthPreview = canvasHeight * imgAspectRatio;
+            }
+
+            let scaledWidth = initialDrawWidthPreview * scaleFactor;
+            let scaledHeight = initialDrawHeightPreview * scaleFactor;
+
+            targetCtx.translate(imageX + scaledWidth / 2, imageY + scaledHeight / 2);
+            targetCtx.rotate(rotationAngle * Math.PI / 180);
+            targetCtx.scale(flipH, flipV);
+
+            targetCtx.drawImage(userImage, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
+
+            targetCtx.restore();
+            targetCtx.filter = 'none'; 
+
+            // --- 3. Draw Frame Image (full canvas, with dynamic opacity) ---
+            targetCtx.save();
+            targetCtx.globalAlpha = frameOpacity;
+            targetCtx.drawImage(frameImage, 0, 0, canvasWidth, canvasHeight);
+            targetCtx.restore();
+
+            // --- 4. Draw Facebook Overlay (if enabled) ---
+            if (isFacebookProfileMode && facebookViewImageLoaded) {
+                targetCtx.save();
+                targetCtx.drawImage(facebookViewImage, 0, 0, canvasWidth, canvasHeight);
+                targetCtx.restore();
+                console.log("Facebook Mode: Drawing Facebook View overlay on top of preview.");
+            }
+
+            // --- 5. Draw Grid (always on top for UI guidance) ---
+            drawGrid(targetCtx, canvasWidth, canvasHeight);
+            console.log("Preview Canvas drawn. Current flipH:", flipH, "Facebook Mode:", isFacebookProfileMode);
+        }
+
+        // Function to draw to an OFFSCREEN high-quality canvas for download
+        function drawFinalImage() {
+            if (!userImage || !frameLoaded || !userImage.src || (currentImageSource === 'placeholder' && !placeholderLoaded)) {
+                console.error("Cannot draw final image: resources not loaded or no user image.");
+                return null;
+            }
+
+            const offscreenCanvas = document.createElement('canvas');
+            // Set offscreen canvas dimensions to match the frame image's natural resolution
+            offscreenCanvas.width = frameImage.naturalWidth; 
+            offscreenCanvas.height = frameImage.naturalHeight;
+            const offscreenCtx = offscreenCanvas.getContext('2d');
+
+            offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+
+            // Calculate scaling ratio from preview canvas to high-res canvas
+            const scaleRatio = offscreenCanvas.width / imageCanvas.width;
+
+            // --- 1. Draw Blurred Background (scaled for high-res) ---
+            if (currentImageSource !== 'placeholder') {
+                offscreenCtx.save();
+                offscreenCtx.filter = 'blur(10px)'; // Blur amount might need adjustment for high-res
+
+                let sourceX = 0;
+                let sourceY = 0;
+                let sourceWidth = userImage.naturalWidth;
+                let sourceHeight = userImage.naturalHeight;
+
+                const imageAspectRatio = userImage.naturalWidth / userImage.naturalHeight;
+                const canvasAspectRatio = offscreenCanvas.width / offscreenCanvas.height;
+
+                if (imageAspectRatio > canvasAspectRatio) {
+                    sourceWidth = userImage.naturalHeight * canvasAspectRatio;
+                    sourceX = (userImage.naturalWidth - sourceWidth) / 2;
+                } else {
+                    sourceHeight = userImage.naturalWidth / canvasAspectRatio;
+                    sourceY = (userImage.naturalHeight - sourceHeight) / 2;
+                }
+
+                offscreenCtx.drawImage(userImage, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
+                offscreenCtx.restore();
+            }
+
+            // --- 2. Draw Main User Image (high-res with scaled transformations and filters) ---
+            offscreenCtx.save();
+
+            offscreenCtx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`;
+
+            // Calculate initial fit for the user image on the HIGH-RES canvas
+            let imgAspectRatio = userImage.naturalWidth / userImage.naturalHeight;
+            let initialDrawWidthHighRes, initialDrawHeightHighRes;
+
+            if (imgAspectRatio > offscreenCanvas.width / offscreenCanvas.height) {
+                initialDrawWidthHighRes = offscreenCanvas.width;
+                initialDrawHeightHighRes = offscreenCanvas.width / imgAspectRatio;
+            } else {
+                initialDrawHeightHighRes = offscreenCanvas.height;
+                initialDrawWidthHighRes = offscreenCanvas.height * imgAspectRatio;
+            }
+
+            // Scale the existing transformation values (imageX, imageY, scaleFactor)
+            const finalImageX = imageX * scaleRatio;
+            const finalImageY = imageY * scaleRatio;
+            const finalScaleFactor = scaleFactor; // scaleFactor is already a ratio, apply directly
+
+            let scaledWidthHighRes = initialDrawWidthHighRes * finalScaleFactor;
+            let scaledHeightHighRes = initialDrawHeightHighRes * finalScaleFactor;
+
+            offscreenCtx.translate(finalImageX + scaledWidthHighRes / 2, finalImageY + scaledHeightHighRes / 2);
+            offscreenCtx.rotate(rotationAngle * Math.PI / 180);
+            offscreenCtx.scale(flipH, flipV);
+
+            offscreenCtx.drawImage(userImage, -scaledWidthHighRes / 2, -scaledHeightHighRes / 2, scaledWidthHighRes, scaledHeightHighRes);
+
+            offscreenCtx.restore();
+            offscreenCtx.filter = 'none'; 
+
+            // --- 3. Draw Frame Image (full natural resolution) ---
+            offscreenCtx.save();
+            offscreenCtx.globalAlpha = frameOpacity; // Use current frame opacity
+            offscreenCtx.drawImage(frameImage, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
+            offscreenCtx.restore();
+
+            // Facebook Overlay is explicitly NOT drawn for final download
+            // The `if (isFacebookProfileMode && facebookViewImageLoaded)` block is intentionally omitted here.
+
+            // Do NOT draw grid on final image
+            // drawGrid(offscreenCtx, offscreenCanvas.width, offscreenCtx.height); 
+
+            console.log("Final high-res image drawn.");
+            return offscreenCanvas.toDataURL('image/png');
+        }
+
+
+        // --- WebRTC Camera Functions ---
+        async function requestCameraPermissionAndPlay() {
+            console.log("requestCameraPermissionAndPlay called.");
+
+            let currentPermissionStatus = localStorage.getItem(CAMERA_PERMISSION_KEY);
+
+            if (currentPermissionStatus === 'denied') {
+                showMessageBox("Camera access was previously denied. Please enable it manually in your browser settings to use the webcam.", true);
+                setWebcamControlButtonsState(false);
+                return;
+            }
+
+            // Stop any existing stream before requesting a new one
+            stopWebcam(); 
+
+            try {
+                const constraints = { 
+                    audio: false, 
+                    video: {
+                        width: { ideal: 3840 },
+                        height: { ideal: 2160 },
+                        facingMode: webcamCurrentFacingMode
+                    } 
+                };
+
+                localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                console.log("getUserMedia successful. Stream obtained:", localStream);
+                localStorage.setItem(CAMERA_PERMISSION_KEY, 'granted');
+                webcamVideo.srcObject = localStream;
+                webcamVideo.play();
+                applyWebcamTransforms();
+
+                if ("ImageCapture" in window) {
+                    const track = localStream.getVideoTracks()[0];
+                    imageCapture = new ImageCapture(track);
+                    console.log("ImageCapture API available and initialized.");
+                } else {
+                    console.log("ImageCapture API not available. Falling back to canvas capture.");
+                }
+                setWebcamControlButtonsState(true);
+                await loadCameraDevices();
+            } catch (err) {
+                console.error('getUserMediaError', err, err.stack);
+                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                    localStorage.setItem(CAMERA_PERMISSION_KEY, 'denied');
+                    showMessageBox("Camera access was denied. Please allow camera permissions in your browser settings to use this feature.", true);
+                } else if (err.name === 'NotFoundError') {
+                    showMessageBox("No camera found. Please ensure a camera is connected and enabled.", true);
+                } else if (err.name === 'NotReadableError') {
+                    showMessageBox("Camera is already in use by another application or browser tab. Please close other applications and try again.", true);
+                }
+                 else {
+                    showMessageBox(`Could not start camera. ${err.name}: ${err.message}`, true);
+                }
+                setWebcamControlButtonsState(false);
+            }
+        }
+
+        async function loadCameraDevices() {
+            cameraDevices = [];
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                for (let i = 0; i < devices.length; i++) {
+                    let device = devices[i];
+                    if (device.kind === 'videoinput') {
+                        cameraDevices.push(device);
+                    }
+                }
+                console.log("Detected camera devices:", cameraDevices.length);
+                // Re-evaluate flipCameraButton state based on detected devices
+                flipCameraButton.disabled = !(localStream !== null && cameraDevices.length > 1);
+            } catch (e) {
+                console.error("Error enumerating devices:", e);
+            }
+        }
+
+        function applyWebcamTransforms() {
+            let transformString = '';
+            // Apply flip to the webcam preview video element
+            if (webcamPreviewFlip === -1) {
+                transformString += `scaleX(-1) `;
+            }
+            webcamVideo.style.transform = transformString.trim();
+            console.log("Webcam video transform applied:", webcamVideo.style.transform);
+        }
+
+        function stopWebcam() {
+            console.log("stopWebcam called. Stopping localStream if active.");
+            if (localStream) {
+                localStream.getTracks().forEach(track => {
+                    track.stop();
+                    console.log("Track stopped:", track.kind);
+                });
+                localStream = null;
+            }
+            webcamVideo.srcObject = null;
+            webcamVideo.pause();
+            webcamVideo.currentTime = 0;
+            setWebcamControlButtonsState(false);
+            webcamPreviewFlip = -1; // Reset flip to mirror mode for next session
+            applyWebcamTransforms(); // Clear any transforms on video element
+            console.log("Webcam stream stopped and state reset.");
+        }
+
+        function captureFrame() {
+            console.log("captureFrame called. Capturing raw frame (no flip applied here).");
+            if (!webcamVideo.srcObject) {
+                console.warn("No video stream to capture from.");
+                return null;
+            }
+
+            // Set hidden canvas dimensions to match the video's intrinsic resolution for high quality capture
+            hiddenCanvas.width = webcamVideo.videoWidth;
+            hiddenCanvas.height = webcamVideo.videoHeight;
+            let hCtx = hiddenCanvas.getContext('2d');
+
+            hCtx.clearRect(0, 0, hiddenCanvas.width, hiddenCanvas.height);
+
+            // Draw the video frame to the hidden canvas
+            hCtx.drawImage(webcamVideo, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
+
+            // Return the data URL from the hidden canvas
+            return hiddenCanvas.toDataURL("image/png");
+        }
+
+        captureWebcamPhotoBtn.addEventListener('click', async () => {
+            console.log("Capture Webcam Photo button clicked.");
+            // Store original button HTML to restore it later
+            const originalButtonHtml = captureWebcamPhotoBtn.innerHTML;
+            captureWebcamPhotoBtn.disabled = true;
+            captureWebcamPhotoBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Capturing...';
+
+            let imgSrc = captureFrame();
+
+            if (imgSrc) {
+                setImageOnCanvas(imgSrc, webcamPreviewFlip); // Pass the flip state to setImageOnCanvas
+                hidePhotoSourceModal();
+            } else {
+                showMessageBox("Could not capture photo. Please ensure camera is started.", true);
+            }
+            // Reset button state regardless of success or failure
+            captureWebcamPhotoBtn.disabled = false;
+            captureWebcamPhotoBtn.innerHTML = originalButtonHtml; // Restore original HTML
+        });
+
+        flipWebcamCaptureBtn.addEventListener('click', () => {
+            webcamPreviewFlip *= -1; // Toggle horizontal flip for live video preview
+            applyWebcamTransforms(); // Apply the new flip to the video element
+            console.log("Webcam live preview flip toggled. webcamPreviewFlip:", webcamPreviewFlip);
+        });
+
+        flipCameraButton.addEventListener('click', async () => {
+            console.log("Flip Camera button clicked. Current facing mode:", webcamCurrentFacingMode);
+            // Toggle facing mode ('user' for front, 'environment' for rear)
+            webcamCurrentFacingMode = (webcamCurrentFacingMode === 'user') ? 'environment' : 'user';
+            webcamPreviewFlip = -1; // Reset live video flip to mirror mode when switching cameras, as orientation might change
+            console.log("New facing mode:", webcamCurrentFacingMode, "webcamPreviewFlip reset to -1.");
+            await requestCameraPermissionAndPlay(); // Restart webcam with new facing mode
+        });
+
+        // --- Tab Control Logic ---
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTab = button.dataset.tab;
+
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                button.classList.add('active');
+                document.getElementById(`${targetTab}Tab`).classList.add('active');
+            });
+        });
+
+        // --- Caption Customization Modal Logic ---
+        function showCaptionCustomizationModal() {
+            captionNameInput.value = ''; // Clear previous input
+            captionCourseSelect.value = ''; // Reset dropdown
+            captionCustomizationModal.classList.add('show');
+        }
+
+        function hideCaptionCustomizationModal() {
+            captionCustomizationModal.classList.remove('show');
+        }
+
+        closeCaptionModal.addEventListener('click', hideCaptionCustomizationModal); // Corrected function name
+        captionCustomizationModal.addEventListener('click', (e) => {
+            if (e.target === captionCustomizationModal) {
+                hideCaptionCustomizationModal();
+            }
+        });
+
+        generateCaptionBtn.addEventListener('click', () => {
+            const name = captionNameInput.value.trim();
+            const course = captionCourseSelect.value;
+
+            if (!name || !course) {
+                showMessageBox("Please enter your name/nickname and select your course.", true);
+                return;
+            }
+
+            const generatedCaption = `Good day! I am ${name} from ${course} and this is only a sample caption.`;
+            
+            hideCaptionCustomizationModal(); // Hide customization modal
+            showPopup(
+                "Your caption is ready! Copy it to your clipboard:", 
+                false, 
+                true, 
+                generatedCaption
+            );
+        });
+
+    </script>
+</body>
+</html>
