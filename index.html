@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secret Garden Photo Frame</title>
+    <title>CAFS' Secret Garden DP Frame</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome CDN for icons -->
@@ -97,12 +97,11 @@
             }
         }
 
-        /* File Input and Action Buttons */
-        /* Modified .action-button to match Choose Photo style */
+        /* Global styling for individual action-buttons (Choose Photo, Download, Add Caption, Modal buttons) */
         .action-button {
             background-color: var(--warm-white); /* White background */
             color: var(--primary-gold); /* Gold text */
-            padding: 15px 30px;
+            padding: 15px 30px; /* Consistent padding */
             border-radius: var(--border-radius-soft);
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease, border-color 0.3s ease, color 0.3s ease;
@@ -121,6 +120,7 @@
             box-shadow: 0 5px 15px var(--shadow-medium); /* Shadow */
         }
 
+        /* General hover effect for all action-buttons */
         .action-button:hover:not(:disabled) {
             background-color: var(--primary-gold); /* Gold background on hover */
             color: var(--light-text); /* White text on hover */
@@ -128,6 +128,7 @@
             border-color: var(--primary-gold); /* Keep border gold on hover */
         }
 
+        /* General disabled state styling for all action-buttons */
         .action-button:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
@@ -136,11 +137,10 @@
             box-shadow: none;
         }
 
-        /* Specific styling for the Choose Photo button, inheriting from action-button */
+        /* Specific styling for the Choose Photo button's wrapper */
         .file-input-wrapper {
             position: relative;
             overflow: hidden;
-            /* All other styling (background, color, padding, border-radius, font-weight, text-align, white-space, font-size, display, align-items, justify-content, gap, width, max-width, box-shadow, border) will be inherited from .action-button */
         }
 
         .file-input-wrapper input[type="file"] {
@@ -547,8 +547,6 @@
             margin: 20px auto 0 auto;
         }
 
-        /* .modal-btn now uses global action-button styling */
-
         /* Caption Customization Modal Specifics */
         #captionCustomizationModal .input-field {
             width: calc(100% - 20px);
@@ -565,11 +563,6 @@
             max-width: 400px; /* Limit width */
         }
 
-        #captionCustomizationModal textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-
         #generatedCaptionDisplay {
             background-color: var(--soft-cream);
             border: 1px dashed var(--primary-gold);
@@ -577,6 +570,8 @@
             margin-top: 20px;
             border-radius: var(--border-radius-soft);
             min-height: 50px;
+            max-height: 180px; /* Make scrollable */
+            overflow-y: auto; /* Enable vertical scrolling */
             text-align: left;
             white-space: pre-wrap; /* Preserve line breaks */
             word-wrap: break-word; /* Break long words */
@@ -659,13 +654,6 @@
                 gap: 15px;
             }
 
-            /* Action buttons on smaller screens */
-            /* .action-button,
-            .file-input-wrapper {
-                max-width: none;
-                width: 100%;
-            } */
-
             .tab-button {
                 padding: 8px 10px;
                 font-size: 0.9em;
@@ -690,17 +678,6 @@
             .modal-content h3 {
                 font-size: 1.5em;
             }
-
-            /* Modal buttons on smaller screens (already handled by default column flex) */
-            /* .modal-buttons {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .modal-btn {
-                width: 100%;
-                max-width: 250px;
-            } */
         }
 
         @media (max-width: 480px) {
@@ -798,7 +775,16 @@
             }
         }
 
-        /* Hide portrait controls in landscape */
+        /* Global styling for action-buttons container (Download/Add Caption buttons) */
+        .action-buttons {
+            display: flex;
+            justify-content: center; /* Centers the buttons horizontally */
+            gap: 15px; /* Default space between buttons */
+            width: 100%; /* Takes full width of its parent */
+            flex-wrap: wrap; /* Allows buttons to wrap to the next line on smaller screens */
+        }
+
+        /* Specific landscape adjustments for action-buttons to keep them near each other and match modal buttons */
         @media (orientation: landscape) {
             .portrait-controls {
                 display: none;
@@ -832,18 +818,99 @@
                 max-width: 280px; /* Max width for individual button */
             }
 
-            /* Action buttons (Download/Add Caption) in landscape */
+            /* Action buttons (Download/Add Caption) in landscape - now matching modal buttons */
             .action-buttons {
                 flex-direction: row; /* Side by side */
-                gap: 5px; /* Tiny space */
                 justify-content: center; /* Center the group */
-                width: 100%;
+                width: fit-content; /* Shrink-wrap the content */
+                margin: 0 auto; /* Center the container itself */
+                flex-wrap: nowrap; /* Prevent wrapping in landscape */
+                gap: 10px; /* Match modal button gap */
             }
-            .action-buttons .action-button {
-                flex-grow: 0; /* Don't grow too much */
-                flex-shrink: 0;
-                width: auto; /* Auto width based on content, but respecting max-width */
-                max-width: 280px; /* Keep consistent max width */
+            .action-buttons .action-button { /* Apply flex properties to individual buttons within this container */
+                flex-grow: 0; /* Prevent excessive growth */
+                flex-shrink: 0; /* Prevent excessive shrinking */
+                width: auto; /* Allow width to be determined by content and max-width */
+                max-width: 280px; /* Keep consistent max width, matching modal buttons */
+            }
+        }
+
+        /* Countdown Timer Specific Styles */
+        .countdown-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: var(--border-radius-soft);
+            padding: 30px;
+            box-shadow: 0 8px 20px var(--shadow-medium);
+            transition: opacity 1s ease;
+            opacity: 1;
+            margin-top: 25px; /* Added margin to separate from action buttons */
+            width: 100%; /* Ensure it takes full width of the main container */
+            max-width: 600px; /* Limit max width for aesthetics */
+        }
+
+        .countdown-container.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .countdown-container h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            color: var(--primary-gold);
+            margin-bottom: 20px;
+        }
+
+        .countdown {
+            display: flex;
+            gap: 15px; /* Default gap */
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap; /* Allow time boxes to wrap to next line */
+        }
+
+        .time-box {
+            background: var(--light-gold);
+            color: var(--light-text);
+            border-radius: var(--border-radius-soft);
+            padding: 15px 10px;
+            box-shadow: 0 0 10px var(--shadow-strong);
+            text-align: center;
+            min-width: 60px;
+            flex: 1 1 auto; /* Allows boxes to grow and shrink */
+            max-width: 90px; /* Limits maximum size */
+        }
+
+        .time-box .value {
+            font-size: 36px;
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+        }
+
+        .time-box .label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+
+        /* Responsive adjustments for countdown timer */
+        @media (max-width: 480px) {
+            .countdown-container h1 {
+                font-size: 24px;
+            }
+            .countdown {
+                gap: 10px; /* Reduced gap on smaller screens */
+            }
+            .time-box {
+                min-width: 50px;
+                padding: 12px 8px;
+            }
+            .time-box .value {
+                font-size: 30px; /* Smaller font size for values */
+            }
+            .time-box .label {
+                font-size: 10px; /* Smaller font size for labels */
             }
         }
     </style>
@@ -973,6 +1040,31 @@
             <button class="action-button" id="downloadBtn">DOWNLOAD IMAGE</button>
             <button class="action-button" id="finalizeBtn">ADD CAPTION</button>
         </div>
+
+        <!-- Countdown Timer Section -->
+        <div class="countdown-container">
+            <h1>Get ready! DP Blast starts in...</h1>
+            <div class="countdown">
+                <div class="time-box">
+                    <div class="value" id="days">00</div>
+                    <div class="label">Days</div>
+                </div>
+                <div class="time-box">
+                    <div class="value" id="hours">00</div>
+                    <div class="label">Hours</div>
+                </div>
+                <div class="time-box">
+                    <div class="value" id="minutes">00</div>
+                    <div class="label">Minutes</div>
+                </div>
+                <div class="time-box">
+                    <div class="value" id="seconds">00</div>
+                    <div class="label">Seconds</div>
+                </div>
+            </div>
+        </div>
+        <!-- End Countdown Timer Section -->
+
     </div>
 
     <!-- Hidden Canvas for final output -->
@@ -1020,7 +1112,7 @@
     <div id="captionCustomizationModal" class="modal-overlay">
         <div class="modal-content">
             <button class="close-modal-btn" id="captionModalCloseBtn"><i class="fas fa-times"></i></button>
-            <h3>CUSTOMIZE YOUR SECRET GARDEN CAPTION</h3>
+            <h3>CUSTOMIZE CAPTION</h3>
             <p>Fill in the details below to generate a personalized caption for your photo!</p>
             <label for="personNameInput" class="block text-left text-sm font-bold text-gray-700 mb-1">Nickname or Name:</label>
             <input type="text" id="personNameInput" class="input-field" placeholder="Nickname or Name (e.g. Juan / Jay)">
@@ -1457,6 +1549,10 @@
                 hideLoadingOverlay();
                 toggleControls(false); // Disable controls initially for placeholder
                 console.log("Photo Frame initialized successfully.");
+
+                // Initialize countdown timer after all assets are loaded
+                countdown(); // Initial call to display countdown immediately
+                const timerInterval = setInterval(countdown, 1000); // Start the interval
             } catch (error) {
                 console.error("Initialization failed during image loading:", error);
                 hideLoadingOverlay();
@@ -2024,7 +2120,59 @@
         let generatedCaption = ""; // Variable to store the generated caption
 
         // Hardcoded caption template based on Caption.txt
-        const captionTemplate = "A magical moment with [nickname], celebrating [degree program]! This photo captures the essence of joy and growth.\n\n#SecretGardenMemories #MagicalMoments #PhotoArt";
+        const captionTemplate = `𝑩𝒆𝒏𝒆𝒂𝒕𝒉 𝒕𝒉𝒆 𝒉𝒖𝒔𝒉 𝒐𝒇 𝒆𝒎𝒆𝒓𝒂𝒍𝒅 𝒍𝒆𝒂𝒗𝒆𝒔, 𝒂 𝒔𝒆𝒆𝒅𝒍𝒊𝒏𝒈 𝒔𝒕𝒊𝒓𝒔 𝒂𝒏𝒅 𝒕𝒉𝒆 𝒈𝒂𝒓𝒅𝒆𝒏 𝒃𝒓𝒆𝒂𝒕𝒉𝒆𝒔 🍃🌬
+
+The enchanted gate has finally opened!🗝🚪 I am [nickname], from [degree program] of College of Agriculture and Food Science, a proud 𝐂𝐀𝐅𝐒𝐞𝐞𝐝𝐥𝐢𝐧𝐠—ready to take root, bloom with purpose, and grow through the journey ahead! 🦋🌸
+
+As we step into this new journey, let our presence be known—𝙡𝙚𝙩 𝙩𝙝𝙚 𝙜𝙖𝙧𝙙𝙚𝙣 𝙧𝙚𝙘𝙤𝙜𝙣𝙞𝙯𝙚 𝙤𝙣𝙚 𝙤𝙛 𝙞𝙩𝙨 𝙤𝙬𝙣. This moment marks our first bloom in a place where roots run deep and stories unfold like petals under the sun.🌷
+
+In this enchanted space where curiosity grows wild and purpose takes root, we are more than just a student. We are the new bearer of light, learning, and legacy. A quiet magic lives in every scholar who chooses to grow. 🪄
+
+We are called to bloom not only for ourselves but for the land and the people we serve. In this hidden garden of learning and purpose, each seedling is nurtured by knowledge, rooted in service, and destined to bloom with 𝙞𝙣𝙩𝙚𝙜𝙧𝙞𝙩𝙮, 𝙥𝙖𝙨𝙨𝙞𝙤𝙣, 𝙖𝙣𝙙 𝙘𝙖𝙧𝙚.☘️
+
+We are 𝙨𝙥𝙧𝙤𝙪𝙩𝙨 of promise.🌾
+We are the 𝙗𝙚𝙖𝙧𝙚𝙧𝙨 of hope.🫧
+We are the new 𝙄𝙨𝙠𝙤𝙡𝙖𝙧 𝙣𝙜 𝘽𝙖𝙮𝙖𝙣, ready to root in purpose and rise in service.🌻
+
+𝐖𝐞’𝐯𝐞 𝐨𝐟𝐟𝐢𝐜𝐢𝐚𝐥𝐥𝐲 𝐞𝐧𝐭𝐞𝐫𝐞𝐝 𝐭𝒉𝒆 𝐠𝐚𝐫𝐝𝐞𝐧, 𝐚𝐧𝐝 𝐧𝐨𝐰, 𝐰𝐞 𝐚𝐫𝐞 𝐫𝐞𝐚𝐝𝐲 𝐭𝐨 𝐠𝐫𝐨𝐰. 🧚‍♀️🧚‍♂️
+
+To step into CAFS is to step into a garden of possibility—𝙬𝙝𝙚𝙧𝙚 𝙖𝙜𝙧𝙞𝙘𝙪𝙡𝙩𝙪𝙧𝙚 𝙢𝙚𝙚𝙩𝙨 𝙨𝙘𝙞𝙚𝙣𝙘𝙚, 𝙖𝙣𝙙 𝙬𝙝𝙚𝙧𝙚 𝙙𝙧𝙚𝙖𝙢𝙨 𝙩𝙖𝙠𝙚 𝙧𝙤𝙤𝙩.🔍📖
+
+𝑺𝒐 𝒍𝒆𝒕 𝒕𝒉𝒆 𝒗𝒊𝒏𝒆𝒔 𝒆𝒏𝒕𝒘𝒊𝒏𝒆 𝒂𝒏𝒅 𝒕𝒉𝒆 𝒃𝒍𝒐𝒔𝒔𝒐𝒎𝒔 𝒓𝒊𝒔𝒆. 𝑻𝒉𝒆 𝒈𝒂𝒓𝒅𝒆𝒏 𝒔𝑒𝒆𝒔 𝒚𝒐𝒖 𝒘𝒊𝒕𝒉 𝒘𝒐𝒏𝒅𝒆𝒓 𝒊𝒏 𝒊𝒕𝒔 𝒆𝒚𝒆𝒔 🌱✊🏼
+
+#CAFSeedling
+#CAFreshieS2025
+#Freshies2025
+#CAFS
+#UPLB`;
+
+        /**
+         * Converts a string to its Mathematical Sans-Serif Bold Unicode equivalent.
+         * Only converts English alphabet characters (A-Z, a-z) and digits (0-9).
+         * Other characters are returned as is.
+         * @param {string} text The input string.
+         * @returns {string} The converted string.
+         */
+        function convertToMathSansBold(text) {
+            let convertedText = '';
+            for (let i = 0; i < text.length; i++) {
+                const charCode = text.charCodeAt(i);
+                if (charCode >= 65 && charCode <= 90) { // Uppercase A-Z
+                    // 'A' (U+0041) to '𝗔' (U+1D5D4)
+                    convertedText += String.fromCodePoint(charCode - 65 + 0x1D5D4);
+                } else if (charCode >= 97 && charCode <= 122) { // Lowercase a-z
+                    // 'a' (U+0061) to '𝗮' (U+1D5EE)
+                    convertedText += String.fromCodePoint(charCode - 97 + 0x1D5EE);
+                } else if (charCode >= 48 && charCode <= 57) { // Digits 0-9
+                    // '0' (U+0030) to '𝟬' (U+1D7EC)
+                    convertedText += String.fromCodePoint(charCode - 48 + 0x1D7EC);
+                } else {
+                    convertedText += text[i]; // Keep other characters as is
+                }
+            }
+            return convertedText;
+        }
+
 
         function showCaptionCustomizationModal() {
             captionCustomizationModal.classList.add('active');
@@ -2052,8 +2200,12 @@
                 return;
             }
 
-            let finalCaption = captionTemplate.replace('[nickname]', nickname.toUpperCase());
-            finalCaption = finalCaption.replace('[degree program]', degreeProgram.toUpperCase());
+            // Apply the new font conversion to the nickname and degree program
+            const formattedNickname = convertToMathSansBold(nickname);
+            const formattedDegreeProgram = convertToMathSansBold(degreeProgram);
+
+            let finalCaption = captionTemplate.replace('[nickname]', formattedNickname);
+            finalCaption = finalCaption.replace('[degree program]', formattedDegreeProgram);
             
             generatedCaption = finalCaption;
             generatedCaptionDisplay.textContent = generatedCaption;
@@ -2205,6 +2357,49 @@
             }
             showCaptionCustomizationModal();
         });
+
+        // Countdown Timer Logic (Moved here from separate script block)
+        const countdownContainer = document.querySelector('.countdown-container');
+
+        const countdown = () => {
+            const now = new Date().getTime();
+            // Set the kickoff time to July 26, 2025, 7:00 PM (19:00:00) in the local timezone
+            // Note: This date is hardcoded. If you need it to be dynamic, you'll need to update this line.
+            const kickoff = new Date("Jul 26, 2025 19:00:00").getTime();
+            const distance = kickoff - now;
+
+            if (distance <= 0) {
+                document.getElementById("days").textContent = "00";
+                document.getElementById("hours").textContent = "00";
+                document.getElementById("minutes").textContent = "00";
+                document.getElementById("seconds").textContent = "00";
+
+                // Fade out the countdown
+                countdownContainer.classList.add('fade-out');
+
+                // Remove from layout after fade
+                setTimeout(() => {
+                    countdownContainer.style.display = 'none';
+                }, 1000);
+
+                clearInterval(timerInterval);
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("days").textContent = String(days).padStart(2, '0');
+            document.getElementById("hours").textContent = String(hours).padStart(2, '0');
+            document.getElementById("minutes").textContent = String(minutes).padStart(2, '0');
+            document.getElementById("seconds").textContent = String(seconds).padStart(2, '0');
+        };
+
+        let timerInterval; // Declare timerInterval globally or in a scope accessible by countdown and window.onload
+
+        // The timer will be started in window.onload after all assets are loaded.
     </script>
 </body>
 </html>
