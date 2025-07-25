@@ -138,10 +138,9 @@
 
         /* Specific styling for the Choose Photo button, inheriting from action-button */
         .file-input-wrapper {
-            /* Inherits most styles from .action-button */
             position: relative;
             overflow: hidden;
-            /* No specific background, color, border, shadow here, it comes from .action-button */
+            /* All other styling (background, color, padding, border-radius, font-weight, text-align, white-space, font-size, display, align-items, justify-content, gap, width, max-width, box-shadow, border) will be inherited from .action-button */
         }
 
         .file-input-wrapper input[type="file"] {
@@ -789,13 +788,13 @@
             /* Action buttons (Download/Add Caption) in portrait */
             .action-buttons {
                 flex-direction: column; /* Stack vertically */
-                gap: 15px;
+                gap: 15px; /* Space between stacked buttons */
                 align-items: center; /* Center buttons */
                 width: 100%; /* Ensure the container takes full width */
             }
             .action-buttons .action-button {
                 width: 100%; /* Extend to full width of parent */
-                max-width: none; /* Remove max-width to allow full extension */
+                max-width: 280px; /* Constrain max width for aesthetics */
             }
         }
 
@@ -827,8 +826,8 @@
                 max-width: 600px; /* Allow wider for two buttons */
                 gap: 10px; /* Smaller gap for close proximity */
             }
-            #photoSourceModalButtons .modal-btn,
-            #captionCustomizationModal .modal-buttons .modal-btn {
+            #photoSourceModalButtons .action-button,
+            #captionCustomizationModal .modal-buttons .action-button {
                 flex: 1 1 auto; /* Allow growth */
                 max-width: 280px; /* Max width for individual button */
             }
@@ -877,7 +876,7 @@
     <div class="container">
         <!-- Add Photo to Frame Section -->
         <div class="add-photo-container">
-            <div class="file-input-wrapper" id="imageUploadTrigger">
+            <div class="file-input-wrapper action-button" id="imageUploadTrigger">
                 CHOOSE PHOTO
                 <input type="file" id="selectGalleryInput" accept="image/*">
             </div>
@@ -1140,7 +1139,7 @@
                 } else {
                     // Ensure final values are set precisely
                     currentGridAlpha = targetAlphaGrid;
-                    currentFrameAlpha = targetFrameAlpha;
+                    currentFrameAlpha = targetAlphaFrame;
                     drawImageOnCanvas();
                     animationFrameId = null;
                 }
