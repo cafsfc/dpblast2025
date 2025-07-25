@@ -42,7 +42,7 @@
             align-items: center;
             justify-content: flex-start; /* Align to top initially, allow content to push down */
             min-height: 100vh;
-            padding-top: 20px; /* Add some padding at the top */
+            padding: 20px; /* Added general padding to body */
             position: relative;
         }
 
@@ -80,11 +80,14 @@
             align-items: center;
             gap: 25px;
             max-width: 900px; /* Max width for the container */
-            width: calc(90% - 20px); /* Responsive width with 10px margin on each side */
+            width: calc(100% - 40px); /* Responsive width with 20px margin on each side (from body padding) */
             margin: 0 auto 40px auto; /* Centered with space from bottom */
             opacity: 0; /* Initially hidden for fade-in effect */
             transform: translateY(20px); /* Initially slightly below for slide-in effect */
             animation: fadeInSlideUp 1.5s ease-out 0.5s forwards; /* Delayed animation */
+            z-index: 10; /* Ensure container is above background */
+            position: relative; /* Needed for z-index to work */
+            min-height: fit-content; /* Ensure container expands to fit content */
         }
 
         @keyframes fadeInSlideUp {
@@ -94,67 +97,55 @@
             }
         }
 
-        /* Add Photo Button Container */
-        .add-photo-container {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-        }
-
         /* File Input and Action Buttons */
-        .input-group, .action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            width: 100%;
-            flex-wrap: wrap; /* Allow wrapping on small screens */
-        }
-
-        .file-input-wrapper {
-            background-color: var(--primary-gold);
-            color: var(--light-text);
-            padding: 12px 25px;
-            border-radius: var(--border-radius-soft);
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            font-weight: bold;
-            text-align: center;
-            white-space: nowrap; /* Prevent text wrapping */
-        }
-
-        .file-input-wrapper:hover {
-            background-color: var(--light-gold);
-            transform: translateY(-2px);
-        }
-
-        .file-input-wrapper input[type="file"] {
-            display: none;
-        }
-
+        /* Modified .action-button to match Choose Photo style */
         .action-button {
-            background-color: var(--primary-gold);
-            color: var(--light-text);
-            padding: 12px 25px;
+            background-color: var(--warm-white); /* White background */
+            color: var(--primary-gold); /* Gold text */
+            padding: 15px 30px;
             border-radius: var(--border-radius-soft);
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            transition: background-color 0.3s ease, transform 0.2s ease, border-color 0.3s ease, color 0.3s ease;
             font-weight: bold;
-            border: none;
-            flex-grow: 1; /* Allow buttons to grow */
-            max-width: 200px; /* Limit max width for action buttons */
-            text-transform: uppercase; /* All caps */
+            border: 2px solid var(--primary-gold); /* Gold border */
+            text-transform: uppercase;
             text-align: center;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 0 auto;
+            width: 100%; /* Default to full width on small screens */
+            max-width: 280px; /* Max width for consistency */
+            box-shadow: 0 5px 15px var(--shadow-medium); /* Shadow */
         }
 
         .action-button:hover:not(:disabled) {
-            background-color: var(--light-gold);
+            background-color: var(--primary-gold); /* Gold background on hover */
+            color: var(--light-text); /* White text on hover */
             transform: translateY(-2px);
+            border-color: var(--primary-gold); /* Keep border gold on hover */
         }
 
         .action-button:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
             color: #666666;
+            border-color: #999999;
+            box-shadow: none;
+        }
+
+        /* Specific styling for the Choose Photo button, inheriting from action-button */
+        .file-input-wrapper {
+            /* Inherits most styles from .action-button */
+            position: relative;
+            overflow: hidden;
+            /* No specific background, color, border, shadow here, it comes from .action-button */
+        }
+
+        .file-input-wrapper input[type="file"] {
+            display: none;
         }
 
         /* Main Content Area (Canvas and Controls) */
@@ -175,6 +166,10 @@
             align-items: center;
             gap: 15px;
             position: relative; /* For positioning the Facebook toggle */
+            z-index: 20; /* Ensure canvas is above container */
+            /* Added padding to ensure space from container edges */
+            padding: 10px;
+            box-sizing: border-box; /* Include padding in width/height */
         }
 
         #imageCanvas {
@@ -268,6 +263,8 @@
             gap: 20px;
             max-width: 350px; /* Max width for controls */
             width: 100%; /* Responsive width */
+            z-index: 20; /* Ensure controls are above container */
+            box-sizing: border-box; /* Include padding in width/height */
         }
 
         .tabs-header {
@@ -278,7 +275,7 @@
         .tab-button {
             flex: 1;
             padding: 10px 15px;
-            background-color: var(--soft-cream);
+            background-color: var(--soft-cream); /* Explicit background for tabs */
             color: var(--dark-text);
             border: none;
             border-radius: var(--border-radius-soft) var(--border-radius-soft) 0 0;
@@ -358,7 +355,6 @@
         #revertPhotoBtn, #revertFiltersBtn { /* Updated ID for filter reset button */
             display: block;
             margin: 20px auto 0 auto; /* Center horizontally */
-            max-width: 200px; /* Keep consistent with other action buttons */
         }
 
         /* Range Slider Styling */
@@ -424,7 +420,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 9999; /* Highest z-index */
             transition: opacity 0.5s ease-out;
             opacity: 0; /* Initially hidden */
             visibility: hidden;
@@ -473,10 +469,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 999;
+            z-index: 2000; /* Default for modals */
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        #alertModal {
+            z-index: 2001; /* Higher than other modals */
         }
 
         .modal-overlay.active {
@@ -520,31 +520,6 @@
             line-height: 1.6;
         }
 
-        .modal-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-            flex-wrap: wrap; /* Default to wrap, overridden by specific IDs */
-        }
-
-        .modal-btn {
-            background-color: var(--primary-gold);
-            color: var(--light-text);
-            padding: 10px 20px;
-            border: none;
-            border-radius: var(--border-radius-soft);
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            text-transform: uppercase; /* All caps */
-        }
-
-        .modal-btn:hover {
-            background-color: var(--light-gold);
-            transform: translateY(-2px);
-        }
-
         .close-modal-btn {
             position: absolute;
             top: 15px;
@@ -561,24 +536,21 @@
             color: var(--primary-gold);
         }
 
-        /* Specific Modal Styles */
-        #photoSourceModalButtons { /* New ID for photo source modal buttons */
+        /* Specific Modal Styles for Photo Source and Caption Buttons */
+        #photoSourceModalButtons,
+        #captionCustomizationModal .modal-buttons {
             display: flex;
-            justify-content: center; /* Center horizontally */
-            gap: 8px;
-            flex-wrap: nowrap; /* Crucial: prevent wrapping */
-            width: 100%; /* Ensure the flex container takes full width */
-            max-width: 300px; /* Limit the overall width of the button strip if needed */
-            margin: 20px auto 0 auto; /* Center the strip itself and add top margin */
+            flex-direction: column; /* Default to column for portrait */
+            align-items: center; /* Center items in column */
+            gap: 15px; /* Adjust gap for vertical stacking */
+            width: 100%;
+            max-width: 320px; /* Constrain width of the button group */
+            margin: 20px auto 0 auto;
         }
 
-        #photoSourceModalButtons .modal-btn {
-            flex: 0 0 calc(50% - 4px); /* Two items, minus half the gap for each */
-            font-size: 0.8em; /* Potentially smaller font for very small screens */
-            padding: 8px 10px; /* Adjusted padding */
-            min-width: 100px; /* Ensure a minimum width */
-        }
+        /* .modal-btn now uses global action-button styling */
 
+        /* Caption Customization Modal Specifics */
         #captionCustomizationModal .input-field {
             width: calc(100% - 20px);
             padding: 10px;
@@ -588,6 +560,10 @@
             box-sizing: border-box;
             font-family: 'Lora', serif; /* Apply Lora font */
             color: var(--dark-text);
+            display: block; /* Ensure inputs take full width */
+            margin-left: auto; /* Center input field */
+            margin-right: auto; /* Center input field */
+            max-width: 400px; /* Limit width */
         }
 
         #captionCustomizationModal textarea {
@@ -607,27 +583,12 @@
             word-wrap: break-word; /* Break long words */
             font-family: 'Lora', serif;
             color: var(--dark-text);
+            margin-left: auto; /* Center the display box */
+            margin-right: auto; /* Center the display box */
+            max-width: 400px; /* Match input field width */
         }
 
-        /* Caption modal buttons fixed to one row */
-        #captionCustomizationModal .modal-buttons {
-            display: flex;
-            justify-content: center; /* Center them */
-            gap: 10px;
-            flex-wrap: nowrap; /* Ensure no wrapping */
-            width: 100%; /* Take full width of parent */
-            max-width: 400px; /* Limit overall width of button strip */
-            margin: 20px auto 0 auto; /* Center the strip itself */
-        }
-        #captionCustomizationModal .modal-buttons .modal-btn {
-            flex: 1 1 auto; /* Allow to grow and shrink, but respect content */
-            font-size: 0.9em;
-            padding: 10px 15px;
-            min-width: 120px; /* Ensure minimum size */
-        }
-
-
-        /* Camera specific styles */
+        /* camera specific styles */
         .camera-section {
             display: flex;
             flex-direction: column;
@@ -652,38 +613,12 @@
             width: 100%;
             justify-content: center;
         }
-        .camera-controls button {
-            flex-grow: 1;
-            padding: 10px 15px;
-            border-radius: 8px;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            background-color: var(--primary-gold);
-            color: white;
-            min-width: 100px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Lora', serif;
-            text-transform: uppercase; /* All caps */
-        }
-        .camera-controls button:hover:not(:disabled) {
-            background-color: var(--light-gold);
-            transform: translateY(-1px);
-        }
-        .camera-controls button:disabled {
-            background-color: #cccccc;
-            color: #666666;
-            cursor: not-allowed;
-            transform: none;
-        }
+        /* Camera control buttons now use the global .action-button styles for consistency */
 
         /* Responsive Adjustments */
         @media (max-width: 768px) {
             body {
-                padding-top: 15px;
+                padding: 15px;
             }
 
             .header-content {
@@ -697,7 +632,7 @@
             .container {
                 padding: 20px;
                 gap: 20px;
-                width: calc(95% - 20px); /* Adjust for smaller screens */
+                width: calc(100% - 30px); /* Adjust for smaller screens based on body padding */
             }
 
             .main-content-area {
@@ -709,6 +644,7 @@
             .canvas-container {
                 width: 100%; /* Full width for canvas container */
                 align-items: center;
+                padding: 5px; /* Reduce padding on smaller screens */
             }
 
             #imageCanvas {
@@ -724,10 +660,12 @@
                 gap: 15px;
             }
 
-            .action-button {
-                max-width: none; /* Remove max-width for full width buttons */
+            /* Action buttons on smaller screens */
+            /* .action-button,
+            .file-input-wrapper {
+                max-width: none;
                 width: 100%;
-            }
+            } */
 
             .tab-button {
                 padding: 8px 10px;
@@ -754,20 +692,21 @@
                 font-size: 1.5em;
             }
 
-            .modal-buttons {
+            /* Modal buttons on smaller screens (already handled by default column flex) */
+            /* .modal-buttons {
                 flex-direction: column;
                 gap: 10px;
             }
 
             .modal-btn {
                 width: 100%;
-                max-width: 250px; /* Constrain max width of modal buttons */
-            }
+                max-width: 250px;
+            } */
         }
 
         @media (max-width: 480px) {
             body {
-                padding-top: 10px;
+                padding: 10px;
             }
 
             .logo-image {
@@ -779,7 +718,7 @@
                 gap: 15px;
             }
 
-            .file-input-wrapper, .action-button {
+            .action-button {
                 padding: 10px 15px;
                 font-size: 0.9em;
             }
@@ -846,6 +785,18 @@
             .portrait-buttons-strip .control-sub-button span.button-text {
                 display: none; /* Hide text */
             }
+
+            /* Action buttons (Download/Add Caption) in portrait */
+            .action-buttons {
+                flex-direction: column; /* Stack vertically */
+                gap: 15px;
+                align-items: center; /* Center buttons */
+                width: 100%; /* Ensure the container takes full width */
+            }
+            .action-buttons .action-button {
+                width: 100%; /* Extend to full width of parent */
+                max-width: none; /* Remove max-width to allow full extension */
+            }
         }
 
         /* Hide portrait controls in landscape */
@@ -854,7 +805,46 @@
                 display: none;
             }
             .landscape-controls {
-                display: flex; /* Ensure landscape controls are visible */
+                display: flex;
+                flex-direction: column; /* Ensure control groups stack vertically */
+                gap: 20px; /* Add some spacing between control groups */
+            }
+            .landscape-controls .control-buttons-group {
+                flex-wrap: nowrap; /* Prevent wrapping in landscape */
+                justify-content: center; /* Center buttons within their group */
+            }
+            .landscape-controls .control-buttons-group .control-sub-button {
+                flex: 1 1 calc(50% - 5px); /* Ensure two buttons per row, accounting for gap */
+                max-width: calc(50% - 5px); /* Ensure they don't grow too large */
+            }
+
+            /* Modal buttons in landscape */
+            #photoSourceModalButtons,
+            #captionCustomizationModal .modal-buttons {
+                flex-direction: row; /* Horizontal for landscape */
+                flex-wrap: nowrap;
+                justify-content: center; /* Center horizontally */
+                max-width: 600px; /* Allow wider for two buttons */
+                gap: 10px; /* Smaller gap for close proximity */
+            }
+            #photoSourceModalButtons .modal-btn,
+            #captionCustomizationModal .modal-buttons .modal-btn {
+                flex: 1 1 auto; /* Allow growth */
+                max-width: 280px; /* Max width for individual button */
+            }
+
+            /* Action buttons (Download/Add Caption) in landscape */
+            .action-buttons {
+                flex-direction: row; /* Side by side */
+                gap: 5px; /* Tiny space */
+                justify-content: center; /* Center the group */
+                width: 100%;
+            }
+            .action-buttons .action-button {
+                flex-grow: 0; /* Don't grow too much */
+                flex-shrink: 0;
+                width: auto; /* Auto width based on content, but respecting max-width */
+                max-width: 280px; /* Keep consistent max width */
             }
         }
     </style>
@@ -875,7 +865,7 @@
             <h3 id="alertModalTitle"></h3>
             <p id="alertModalMessage"></p>
             <div class="modal-buttons">
-                <button class="modal-btn" id="alertModalOkBtn">OKAY</button>
+                <button class="action-button" id="alertModalOkBtn">OKAY</button>
             </div>
         </div>
     </div>
@@ -1005,10 +995,10 @@
                 <h3>CHOOSE YOUR PHOTO SOURCE</h3>
                 <p>Select whether you'd like to upload a photo from your gallery or take one using your camera.</p>
                 <div class="modal-buttons" id="photoSourceModalButtons">
-                    <button class="modal-btn" id="selectGalleryBtn">
+                    <button class="action-button" id="selectGalleryBtn">
                         <i class="fas fa-image"></i> GALLERY
                     </button>
-                    <button class="modal-btn" id="useCameraBtn">
+                    <button class="action-button" id="useCameraBtn">
                         <i class="fas fa-camera"></i> CAMERA
                     </button>
                 </div>
@@ -1019,9 +1009,9 @@
                 <h3 style="color: var(--primary-gold); margin-top: 20px;">CAMERA PREVIEW</h3>
                 <video id="cameraVideo" autoplay playsinline muted></video>
                 <div class="camera-controls">
-                    <button id="captureCameraPhotoBtn"><i class="fas fa-camera-retro"></i> CAPTURE</button>
-                    <button id="flipCameraPreviewBtn"><i class="fas fa-arrows-rotate"></i> FLIP PREVIEW</button>
-                    <button id="switchCameraButton" disabled><i class="fas fa-sync-alt"></i> SWITCH CAMERA</button>
+                    <button class="action-button" id="captureCameraPhotoBtn"><i class="fas fa-camera-retro"></i> CAPTURE</button>
+                    <button class="action-button" id="flipCameraPreviewBtn"><i class="fas fa-arrows-rotate"></i> FLIP PREVIEW</button>
+                    <button class="action-button" id="switchCameraButton" disabled><i class="fas fa-sync-alt"></i> SWITCH CAMERA</button>
                 </div>
             </div>
         </div>
@@ -1046,9 +1036,9 @@
             <div id="generatedCaptionDisplay">
                 Your generated caption will appear here.
             </div>
-            <div class="modal-buttons" style="display: flex; justify-content: space-around; gap: 10px; flex-wrap: nowrap;">
-                <button class="modal-btn" id="generateCaptionBtn" style="flex-grow: 1;">GENERATE CAPTION</button>
-                <button class="modal-btn" id="copyCaptionBtn" style="flex-grow: 1;">COPY TO CLIPBOARD</button>
+            <div class="modal-buttons" id="captionCustomizationModalButtons">
+                <button class="action-button" id="generateCaptionBtn">GENERATE CAPTION</button>
+                <button class="action-button" id="copyCaptionBtn">COPY TO CLIPBOARD</button>
             </div>
         </div>
     </div>
@@ -1150,7 +1140,7 @@
                 } else {
                     // Ensure final values are set precisely
                     currentGridAlpha = targetAlphaGrid;
-                    currentFrameAlpha = targetAlphaFrame;
+                    currentFrameAlpha = targetFrameAlpha;
                     drawImageOnCanvas();
                     animationFrameId = null;
                 }
@@ -1190,7 +1180,7 @@
         // Function to load an image and set it as currentImage
         function loadImageAndSet(imgSrc, initialFlipH = 1) {
             return new Promise((resolve, reject) => {
-                showLoadingOverlay("PROCESSING IMAGE...");
+                showLoadingOverlay("IMPORTING PICTURE..."); // Updated loading message
                 const img = new Image();
                 img.onload = () => {
                     currentImage = img;
@@ -1422,7 +1412,7 @@
         // Initial image and frame loading
         window.onload = async function() {
             console.log("window.onload triggered. Starting initialization...");
-            showLoadingOverlay("INITIALIZING PHOTO FRAME...");
+            showLoadingOverlay("LOADING ASSETS..."); // Updated loading message
 
             // Load all necessary images first
             const loadImageElement = (imgElement, fallbackWidth = 500, fallbackHeight = 500, altText = 'IMAGE') => {
@@ -2122,87 +2112,90 @@
                 return;
             }
 
-            showLoadingOverlay("PREPARING IMAGE FOR DOWNLOAD...");
+            showLoadingOverlay("DOWNLOADING IMAGE..."); // Updated loading message
 
-            // Create a temporary canvas for the final high-resolution output
-            const tempCanvas = document.createElement('canvas');
-            const tempCtx = tempCanvas.getContext('2d');
+            // Simulate a 2-second delay before actual download
+            setTimeout(() => {
+                // Create a temporary canvas for the final high-resolution output
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
 
-            // Set tempCanvas dimensions to the natural resolution of the frame image
-            // This ensures the downloaded image is high quality.
-            tempCanvas.width = frameImage.naturalWidth;
-            tempCanvas.height = frameImage.naturalHeight;
+                // Set tempCanvas dimensions to the natural resolution of the frame image
+                // This ensures the downloaded image is high quality.
+                tempCanvas.width = frameImage.naturalWidth;
+                tempCanvas.height = frameImage.naturalHeight;
 
-            // Calculate the scaling factor from the preview canvas to the high-res canvas
-            const scaleRatio = tempCanvas.width / imageCanvas.width;
+                // Calculate the scaling factor from the preview canvas to the high-res canvas
+                const scaleRatio = tempCanvas.width / imageCanvas.width;
 
-            tempCtx.clearRect(0, 0, tempCanvas.width, tempCtx.height);
+                tempCtx.clearRect(0, 0, tempCanvas.width, tempCtx.height);
 
-            // 1. Draw blurred background for high-res output
-            tempCtx.save();
-            tempCtx.filter = 'blur(10px)'; // Blur amount might need adjustment for high-res
+                // 1. Draw blurred background for high-res output
+                tempCtx.save();
+                tempCtx.filter = 'blur(10px)'; // Blur amount might need adjustment for high-res
 
-            // Apply flip to the blurred background for download
-            tempCtx.translate(tempCanvas.width / 2, tempCtx.height / 2); // Translate to center for scaling
-            tempCtx.scale(flipH, flipV);
-            tempCtx.translate(-tempCtx.width / 2, -tempCtx.height / 2); // Translate back
+                // Apply flip to the blurred background for download
+                tempCtx.translate(tempCanvas.width / 2, tempCtx.height / 2); // Translate to center for scaling
+                tempCtx.scale(flipH, flipV);
+                tempCtx.translate(-tempCtx.width / 2, -tempCtx.height / 2); // Translate back
 
-            const bgAspectRatio = currentImage.naturalWidth / currentImage.naturalHeight;
-            let bgDrawWidth, bgDrawHeight, bgDrawX, bgDrawY;
+                const bgAspectRatio = currentImage.naturalWidth / currentImage.naturalHeight;
+                let bgDrawWidth, bgDrawHeight, bgDrawX, bgDrawY;
 
-            if (bgAspectRatio > tempCanvas.width / tempCanvas.height) {
-                bgDrawHeight = tempCanvas.height;
-                bgDrawWidth = tempCanvas.height * bgAspectRatio;
-            } else {
-                bgDrawWidth = tempCanvas.width;
-                bgDrawHeight = tempCanvas.width / bgAspectRatio;
-            }
-            bgDrawX = (tempCanvas.width - bgDrawWidth) / 2;
-            bgDrawY = (tempCanvas.height - bgDrawHeight) / 2;
-            tempCtx.drawImage(currentImage, bgDrawX, bgDrawY, bgDrawWidth, bgDrawHeight);
-            tempCtx.restore();
+                if (bgAspectRatio > tempCanvas.width / tempCanvas.height) {
+                    bgDrawHeight = tempCanvas.height;
+                    bgDrawWidth = tempCanvas.height * bgAspectRatio;
+                } else {
+                    bgDrawWidth = tempCanvas.width;
+                    bgDrawHeight = tempCanvas.width / bgAspectRatio;
+                }
+                bgDrawX = (tempCanvas.width - bgDrawWidth) / 2;
+                bgDrawY = (tempCanvas.height - bgDrawHeight) / 2;
+                tempCtx.drawImage(currentImage, bgDrawX, bgDrawY, bgDrawWidth, bgDrawHeight);
+                tempCtx.restore();
 
-            // 2. Draw the main user image with transformations and filters, scaled for high-res
-            tempCtx.save();
-            
-            // Apply combined filters
-            tempCtx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`;
+                // 2. Draw the main user image with transformations and filters, scaled for high-res
+                tempCtx.save();
+                
+                // Apply combined filters
+                tempCtx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`;
 
-            // Scale transformations for high-resolution canvas
-            let imgDisplayWidth = currentImage.naturalWidth * zoomLevel * scaleRatio;
-            let imgDisplayHeight = currentImage.naturalHeight * zoomLevel * scaleRatio;
+                // Scale transformations for high-resolution canvas
+                let imgDisplayWidth = currentImage.naturalWidth * zoomLevel * scaleRatio;
+                let imgDisplayHeight = currentImage.naturalHeight * zoomLevel * scaleRatio;
 
-            let finalPanX = panX * scaleRatio;
-            let finalPanY = panY * scaleRatio;
+                let finalPanX = panX * scaleRatio;
+                let finalPanY = panY * scaleRatio;
 
-            tempCtx.translate(finalPanX + imgDisplayWidth / 2, finalPanY + imgDisplayHeight / 2);
+                tempCtx.translate(finalPanX + imgDisplayWidth / 2, finalPanY + imgDisplayHeight / 2);
 
-            if (rotationAngle !== 0) {
-                tempCtx.rotate(rotationAngle);
-            }
+                if (rotationAngle !== 0) {
+                    tempCtx.rotate(rotationAngle);
+                }
 
-            tempCtx.scale(flipH, flipV);
+                tempCtx.scale(flipH, flipV);
 
-            tempCtx.drawImage(currentImage, -imgDisplayWidth / 2, -imgDisplayHeight / 2, imgDisplayWidth, imgDisplayHeight);
-            tempCtx.restore();
-            tempCtx.filter = 'none'; // Reset filter
+                tempCtx.drawImage(currentImage, -imgDisplayWidth / 2, -imgDisplayHeight / 2, imgDisplayWidth, imgDisplayHeight);
+                tempCtx.restore();
+                tempCtx.filter = 'none'; // Reset filter
 
-            // 3. Draw the frame on top (at its natural resolution)
-            tempCtx.drawImage(frameImage, 0, 0, tempCanvas.width, tempCanvas.height);
+                // 3. Draw the frame on top (at its natural resolution)
+                tempCtx.drawImage(frameImage, 0, 0, tempCanvas.width, tempCanvas.height);
 
-            // Facebook overlay is intentionally NOT drawn for download
+                // Facebook overlay is intentionally NOT drawn for download
 
-            // Get image data and trigger download
-            const dataURL = tempCanvas.toDataURL('image/png');
-            const a = document.createElement('a');
-            a.href = dataURL;
-            a.download = 'secret_garden_photo_frame.png';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+                // Get image data and trigger download
+                const dataURL = tempCanvas.toDataURL('image/png');
+                const a = document.createElement('a');
+                a.href = dataURL;
+                a.download = 'secret_garden_photo_frame.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
 
-            hideLoadingOverlay();
-            showAlertModal("IMAGE DOWNLOADED SUCCESSFULLY!", "SUCCESS");
+                hideLoadingOverlay();
+                showAlertModal("IMAGE DOWNLOADED SUCCESSFULLY!", "SUCCESS");
+            }, 2000); // 2-second delay
         });
 
         // Finalize Picture Button - now "Add Caption"
