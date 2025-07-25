@@ -1693,8 +1693,9 @@
                 zoomLevel += scaleAmount;
             } else {
                 // Zoom out
-                zoomLevel = Math.max(0.1, zoomLevel - scaleAmount); // Prevent zooming out too much
+                zoomLevel -= scaleAmount;
             }
+            zoomLevel = Math.max(0.1, Math.min(5, zoomLevel)); // Clamp zoom level between 0.1 and 5
 
             // Adjust pan to zoom towards mouse position
             panX = mouseX - ((mouseX - panX) * (zoomLevel / oldZoomLevel));
@@ -1714,7 +1715,8 @@
         document.getElementById('zoomInBtn').addEventListener('click', (e) => {
             if (!currentImage || currentImage === defaultImage) return;
             const oldZoomLevel = zoomLevel;
-            zoomLevel += 0.1; // Gentle increment
+            zoomLevel += 0.05; // Gentle increment
+            zoomLevel = Math.min(5, zoomLevel); // Clamp upper limit
             
             // Zoom towards the center of the canvas
             const canvasCenterX = imageCanvas.width / 2;
@@ -1729,8 +1731,8 @@
         document.getElementById('zoomOutBtn').addEventListener('click', (e) => {
             if (!currentImage || currentImage === defaultImage) return;
             const oldZoomLevel = zoomLevel;
-            zoomLevel = Math.max(0.1, zoomLevel - 0.1); // Gentle decrement
-
+            zoomLevel = Math.max(0.1, zoomLevel - 0.05); // Gentle decrement
+            
             // Zoom towards the center of the canvas
             const canvasCenterX = imageCanvas.width / 2;
             const canvasCenterY = imageCanvas.height / 2;
@@ -1769,7 +1771,8 @@
         document.getElementById('zoomInBtnPortrait').addEventListener('click', (e) => {
             if (!currentImage || currentImage === defaultImage) return;
             const oldZoomLevel = zoomLevel;
-            zoomLevel += 0.1;
+            zoomLevel += 0.05;
+            zoomLevel = Math.min(5, zoomLevel); // Clamp upper limit
             const canvasCenterX = imageCanvas.width / 2;
             const canvasCenterY = imageCanvas.height / 2;
             panX = canvasCenterX - ((canvasCenterX - panX) * (zoomLevel / oldZoomLevel));
@@ -1780,7 +1783,7 @@
         document.getElementById('zoomOutBtnPortrait').addEventListener('click', (e) => {
             if (!currentImage || currentImage === defaultImage) return;
             const oldZoomLevel = zoomLevel;
-            zoomLevel = Math.max(0.1, zoomLevel - 0.1);
+            zoomLevel = Math.max(0.1, zoomLevel - 0.05);
             const canvasCenterX = imageCanvas.width / 2;
             const canvasCenterY = imageCanvas.height / 2;
             panX = canvasCenterX - ((canvasCenterX - panX) * (zoomLevel / oldZoomLevel));
@@ -2115,7 +2118,7 @@
         let generatedCaption = ""; // Variable to store the generated caption
 
         // Hardcoded caption template based on Caption.txt
-        const captionTemplate = `𝑩𝒆𝒏𝒆𝒂𝒕𝒉 𝒕𝒉𝒆 𝒉𝒖𝒔𝒉 𝒐𝒇 𝒆𝒎𝒆𝒓𝒂𝒍𝒅 𝒍𝒆𝒂𝒗𝒆𝒔, 𝒂 𝒔𝒆𝒆𝒅𝒍𝒊𝒏𝒈 𝒔𝒕𝒊𝒓𝒔 𝒂𝒏𝒅 𝒕𝒉𝒆 𝒈𝒂𝒓𝒅𝒆𝒏 𝒃𝒓𝒆𝒂𝒕𝒉𝒆𝒔 🍃🌬
+        const captionTemplate = `𝑩𝒆𝒏𝒆𝒂𝒕𝒉 𝒕𝒉𝒆 𝒉𝒖𝒔𝒉 𝒐𝒇  𝒎𝒆𝒓𝒂𝒍𝒅 𝒍𝒆𝒂𝒗𝒆𝒔, 𝒂 𝒔𝒆𝒆𝒅𝒍𝒊𝒏𝒈 𝒔𝒕𝒊𝒓𝒔 𝒂𝒏𝒅 𝒕𝒉𝒆 𝒈𝒂𝒓𝒅𝒆𝒏 𝒃𝒓𝒆𝒂𝒕𝒉𝒆𝒔 🍃🌬
 
 The enchanted gate has finally opened!🗝🚪 I am [nickname], from [degree program] of College of Agriculture and Food Science, a proud 𝐂𝐀𝐅𝐒𝐞𝐞𝐝𝐥𝐢𝐧𝐠—ready to take root, bloom with purpose, and grow through the journey ahead! 🦋🌸
 
@@ -2131,7 +2134,7 @@ We are the new 𝙄𝙨𝙠𝙤𝙡𝙖𝙧 𝙣𝙜 𝘽𝙖𝙮𝙖𝙣, ready
 
 𝐖𝐞’𝐯𝐞 𝐨𝐟𝐟𝐢𝐜𝐢𝐚𝐥𝐥𝐲 𝐞𝐧𝐭𝐞𝐫𝐞𝐝 𝐭𝒉𝒆 𝐠𝐚𝐫𝐝𝐞𝐧, 𝐚𝐧𝐝 𝐧𝐨𝐰, 𝐰𝐞 𝐚𝐫𝐞 𝐫𝐞𝐚𝐝𝐲 𝐭𝐨 𝐠𝐫𝐨𝐰. 🧚‍♀️🧚‍♂️
 
-To step into CAFS is to step into a garden of possibility—𝙬𝙝𝙚𝙧𝙚 𝙖𝙜𝙧𝙞𝙘𝙪𝙡𝙩𝙪𝙧𝙚 𝙢𝙚𝙚𝙩𝙨 𝙨𝙘𝙞𝙚𝙣𝙘𝙚, 𝙖𝙣𝙙 𝙬𝙝𝙚𝙧𝙚 𝙙𝙧𝙚𝙖𝙢𝙨 𝙩𝙖𝙠𝙚 𝙧𝙤𝙤𝙩.🔍📖
+To step into CAFS is to step into a garden of possibility—𝙬𝙝𝙚𝙧𝙚 𝙖𝙜𝙧𝙞𝙘𝙪𝙡𝙩𝙪𝙧𝙚 m𝙚𝙚𝙩𝙨 𝙨𝙘𝙞𝙚𝙣𝙘𝙚, 𝙖𝙣𝙙 𝙬𝙝𝙚𝙧𝙚 𝙙𝙧𝙚𝙖𝙢𝙨 𝙩𝙖𝙠𝙚 𝙧𝙤𝙤𝙩.🔍📖
 
 𝑺𝒐 𝒍𝒆𝒕 𝒕𝒉𝒆 𝒗𝒊𝒏𝒆𝒔 𝒆𝒏𝒕𝒘𝒊𝒏𝒆 𝒂𝒏𝒅 𝒕𝒉𝒆 𝒃𝒍𝒐𝒔𝒔𝒐𝒎𝒔 𝒓𝒊𝒔𝒆. 𝑻𝒉𝒆 𝒈𝒂𝒓𝒅𝒆𝒏 𝒔𝑒𝑒𝒔 𝒚𝒐𝒖 𝒘𝒊𝒕𝒉 𝒘𝒐𝒏𝒅𝒆𝒓 𝒊𝒏 𝒊𝒕𝒔 𝒆𝒚𝒆𝒔 🌱✊🏼
 
