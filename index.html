@@ -1306,7 +1306,7 @@
                 img.onerror = (error) => {
                     console.error("Error loading image:", error);
                     hideLoadingOverlay();
-                    showAlertModal("FAILED TO LOAD IMAGE. PLEASE TRY ANOTHER FILE OR CHECK THE IMAGE SOURCE.");
+                    showAlertModal("FAILED TO LOAD IMAGE. PLEASE TRY ANOTHER FILE ORd CHECK THE IMAGE SOURCE.");
                     reject(error);
                 };
                 img.src = imgSrc;
@@ -1547,8 +1547,7 @@
                 console.log("Photo Frame initialized successfully.");
 
                 // Initialize countdown timer after all assets are loaded
-                countdown(); // Initial call to display countdown immediately
-                const timerInterval = setInterval(countdown, 1000); // Start the interval
+                timerInterval = setInterval(countdown, 1000); // Start the interval
             } catch (error) {
                 console.error("Initialization failed during image loading:", error);
                 hideLoadingOverlay();
@@ -1608,8 +1607,8 @@
                 isPinching = true;
                 initialPinchDistance = getPinchDistance(e.touches);
                 initialZoomLevel = zoomLevel;
-                initialPanX = panX;
-                initialPanY = panY;
+                initialPanX = 0; // Reset initial pan for pinch center calculation
+                initialPanY = 0; // Reset initial pan for pinch center calculation
                 imageCanvas.classList.add('grabbing');
                 animateAlpha(1, 0.5);
             }
@@ -2116,13 +2115,13 @@
         let generatedCaption = ""; // Variable to store the generated caption
 
         // Hardcoded caption template based on Caption.txt
-        const captionTemplate = `𝑩𝒆𝒏𝒆𝒂𝒕𝒉 𝒕𝒉𝒆 𝒉𝒖𝒔𝒉 𝒐𝒇 𝒆𝒎 𝒓𝒂𝒍𝒅 𝒍𝒆𝒂𝒗𝒆𝒔, 𝒂 𝒔𝒆𝒆𝒅𝒍𝒊𝒏𝒈 𝒔𝒕𝒊𝒓𝒔 𝒂𝒏𝒅 𝒕𝒉𝒆 𝒈𝒂𝒓𝒅 𝒏 𝒃𝒓𝒆𝒂𝒕𝒉𝒆𝒔 🍃🌬
+        const captionTemplate = `𝑩𝒆𝒏𝒆𝒂𝒕𝒉 𝒕𝒉𝒆 𝒉𝒖𝒔𝒉 𝒐𝒇 𝒆𝒎𝒆𝒓𝒂𝒍𝒅 𝒍𝒆𝒂𝒗𝒆𝒔, 𝒂 𝒔𝒆𝒆𝒅𝒍𝒊𝒏𝒈 𝒔𝒕𝒊𝒓𝒔 𝒂𝒏𝒅 𝒕𝒉𝒆 𝒈𝒂𝒓𝒅𝒆𝒏 𝒃𝒓𝒆𝒂𝒕𝒉𝒆𝒔 🍃🌬
 
 The enchanted gate has finally opened!🗝🚪 I am [nickname], from [degree program] of College of Agriculture and Food Science, a proud 𝐂𝐀𝐅𝐒𝐞𝐞𝐝𝐥𝐢𝐧𝐠—ready to take root, bloom with purpose, and grow through the journey ahead! 🦋🌸
 
 As we step into this new journey, let our presence be known—𝙡𝙚𝙩 𝙩𝙝𝙚 𝙜𝙖𝙧𝙙𝙚𝙣 𝙧𝙚𝙘𝙤𝙜𝙣𝙞𝙯𝙚 𝙤𝙣𝙚 𝙤𝙛 𝙞𝙩𝙨 𝙤𝙬𝙣. This moment marks our first bloom in a place where roots run deep and stories unfold like petals under the sun.🌷
 
-In this enchanted space where curiosity grows wild and purpose takes root, we are more than just a student. We are the new bearer of light, learning, and legacy. A quiet magic lives in every scholar who chooses to grow. 🪄
+In this enchanted space where curiosity grows wild and purpose takes root, we are more than just students. We are the new bearers of light, learning, and legacy. A quiet magic lives in every scholar who chooses to grow. 🪄
 
 We are called to bloom not only for ourselves but for the land and the people we serve. In this hidden garden of learning and purpose, each seedling is nurtured by knowledge, rooted in service, and destined to bloom with 𝙞𝙣𝙩𝙚𝙜𝙧𝙞𝙩𝙮, 𝙥𝙖𝙨𝙨𝙞𝙤𝙣, 𝙖𝙣𝙙 𝙘𝙖𝙧𝙚.☘️
 
@@ -2132,7 +2131,7 @@ We are the new 𝙄𝙨𝙠𝙤𝙡𝙖𝙧 𝙣𝙜 𝘽𝙖𝙮𝙖𝙣, ready
 
 𝐖𝐞’𝐯𝐞 𝐨𝐟𝐟𝐢𝐜𝐢𝐚𝐥𝐥𝐲 𝐞𝐧𝐭𝐞𝐫𝐞𝐝 𝐭𝒉𝒆 𝐠𝐚𝐫𝐝𝐞𝐧, 𝐚𝐧𝐝 𝐧𝐨𝐰, 𝐰𝐞 𝐚𝐫𝐞 𝐫𝐞𝐚𝐝𝐲 𝐭𝐨 𝐠𝐫𝐨𝐰. 🧚‍♀️🧚‍♂️
 
-To step into CAFS is to step into a garden of possibility—𝙬𝙝𝙚𝙧𝙚 𝙖𝙜𝙧𝙞𝙘𝙪𝙡𝙩𝙪𝙧𝙚 𝙢𝙚𝙚𝙩𝙨  𝙨𝙘𝙞𝙚𝙣𝙘𝙚, 𝙖𝙣𝙙 𝙬𝙝𝙚𝙧𝙚 𝙙𝙧𝙚𝙖𝙢𝙨 𝙩𝙖𝙠𝙚 𝙧𝙤𝙤𝙩.🔍📖
+To step into CAFS is to step into a garden of possibility—𝙬𝙝𝙚𝙧𝙚 𝙖𝙜𝙧𝙞𝙘𝙪𝙡𝙩𝙪𝙧𝙚 𝙢𝙚𝙚𝙩𝙨 𝙨𝙘𝙞𝙚𝙣𝙘𝙚, 𝙖𝙣𝙙 𝙬𝙝𝙚𝙧𝙚 𝙙𝙧𝙚𝙖𝙢𝙨 𝙩𝙖𝙠𝙚 𝙧𝙤𝙤𝙩.🔍📖
 
 𝑺𝒐 𝒍𝒆𝒕 𝒕𝒉𝒆 𝒗𝒊𝒏𝒆𝒔 𝒆𝒏𝒕𝒘𝒊𝒏𝒆 𝒂𝒏𝒅 𝒕𝒉𝒆 𝒃𝒍𝒐𝒔𝒔𝒐𝒎𝒔 𝒓𝒊𝒔𝒆. 𝑻𝒉𝒆 𝒈𝒂𝒓𝒅𝒆𝒏 𝒔𝑒𝑒𝒔 𝒚𝒐𝒖 𝒘𝒊𝒕𝒉 𝒘𝒐𝒏𝒅𝒆𝒓 𝒊𝒏 𝒊𝒕𝒔 𝒆𝒚𝒆𝒔 🌱✊🏼
 
@@ -2358,35 +2357,36 @@ To step into CAFS is to step into a garden of possibility—𝙬𝙝𝙚𝙧𝙚
             }, 2000); // 2-second delay
         });
 
+        // --- Global Time Variables for Testing ---
+        // These are set once when the script loads to simulate the event timeline.
+        // For testing, setting these relative to 'now' at page load.
+        // The actual event time is July 26, 2025, 7:00 PM (19:00:00).
+        // Caption enable time is 2 minutes before kickoff.
+        const KICKOFF_TIME = new Date("Jul 26, 2025 19:00:00").getTime();
+        const CAPTION_ENABLE_TIME = new Date("Jul 26, 2025 18:58:00").getTime(); // 2 minutes before 7 PM
+
         // Finalize Picture Button - now "Add Caption"
         document.getElementById('finalizeBtn').addEventListener('click', () => {
-            const now = new Date().getTime();
-            // Set the caption enable time to July 26, 2025, 6:55 PM (18:55:00)
-            const captionEnableTime = new Date("Jul 26, 2025 18:55:00").getTime();
+            const now = new Date().getTime(); // Get current time at click
 
-            if (now < captionEnableTime) {
-                showAlertModal("Captions can only be added starting 5 minutes before the 7:00 PM DP Blast. Please try again then.", "CAPTION UNAVAILABLE");
+            if (now < CAPTION_ENABLE_TIME) { // Use global CAPTION_ENABLE_TIME
+                showAlertModal("Captions can only be added starting 2 minutes before the 7:00 PM DP Blast. Please try again then.", "CAPTION UNAVAILABLE");
                 return;
             }
-
-            // If an image is not added, show an alert, but still allow the modal to open if time condition is met
-            if (!currentImage || currentImage === defaultImage) {
-                showAlertModal("Please add a photo to the frame first to add a caption!", "INFORMATION");
-                return; // Stop here if no image, even if time is met
-            }
             
+            // Removed the check for currentImage being defaultImage.
+            // The caption modal will now open regardless of whether a photo is present.
             showCaptionCustomizationModal();
         });
 
         // Countdown Timer Logic (Modified to remove 'Days')
         const countdownContainer = document.querySelector('.countdown-container');
+        let timerInterval; // Declare timerInterval globally
 
         const countdown = () => {
             const now = new Date().getTime();
-            // Set the kickoff time to July 26, 2025, 7:00 PM (19:00:00) in the local timezone
-            // Note: This date is hardcoded. If you need it to be dynamic, you'll need to update this line.
-            const kickoff = new Date("Jul 26, 2025 19:00:00").getTime();
-            let distance = kickoff - now;
+            
+            let distance = KICKOFF_TIME - now; // Use the globally defined KICKOFF_TIME
 
             if (distance <= 0) {
                 document.getElementById("hours").textContent = "00";
@@ -2405,18 +2405,14 @@ To step into CAFS is to step into a garden of possibility—𝙬𝙝𝙚𝙧𝙚
                 return;
             }
 
-            // Removed days calculation
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            // Removed update for days
             document.getElementById("hours").textContent = String(hours).padStart(2, '0');
             document.getElementById("minutes").textContent = String(minutes).padStart(2, '0');
             document.getElementById("seconds").textContent = String(seconds).padStart(2, '0');
         };
-
-        let timerInterval; // Declare timerInterval globally or in a scope accessible by countdown and window.onload
 
         // The timer will be started in window.onload after all assets are loaded.
     </script>
