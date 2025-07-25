@@ -1153,8 +1153,8 @@
         let isPinching = false;
         let initialPinchDistance = 0;
         let initialZoomLevel = 1;
-        let initialPanX = 0;
-        let initialPanY = 0;
+        let initialPanX = 0; // Will now store current panX at pinch start
+        let initialPanY = 0; // Will now store current panY at pinch start
         let touchStartX, touchStartY; // For single-finger panning
 
         let rotationAngle = 0; // Current rotation angle in radians
@@ -1514,7 +1514,7 @@
                             resolve();
                         };
                         imgElement.onerror = () => {
-                            console.error(`Failed to load image: ${originalSrc.split('/').pop()}. Using placeholder.`);
+                            console.error(`Failed to load image: ${originalSrc.src.split('/').pop()}. Using placeholder.`);
                             showAlertModal(`WARNING: FAILED TO LOAD ${altText} IMAGE FROM ${originalSrc.split('/').pop()}. USING A GENERIC PLACEHOLDER.`);
                             imgElement.src = `https://placehold.co/${fallbackWidth}x${fallbackHeight}/E0E0E0/333333?text=${encodeURIComponent(altText)}`;
                             imgElement.onload = resolve; // Resolve once placeholder loads
@@ -1607,8 +1607,9 @@
                 isPinching = true;
                 initialPinchDistance = getPinchDistance(e.touches);
                 initialZoomLevel = zoomLevel;
-                initialPanX = 0; // Reset initial pan for pinch center calculation
-                initialPanY = 0; // Reset initial pan for pinch center calculation
+                // Store the current pan values at the start of the pinch
+                initialPanX = panX; 
+                initialPanY = panY; 
                 imageCanvas.classList.add('grabbing');
                 animateAlpha(1, 0.5);
             }
@@ -1632,13 +1633,16 @@
                 const pinchCenterY = (touch1Y + touch2Y) / 2;
 
                 // Apply zoom
-                zoomLevel = initialZoomLevel * scaleFactor;
-                zoomLevel = Math.max(0.1, Math.min(5, zoomLevel)); // Clamp zoom level
-
-                // Adjust pan to zoom around the pinch center
-                panX = pinchCenterX - ((pinchCenterX - initialPanX) * (zoomLevel / initialZoomLevel));
-                panY = pinchCenterY - ((pinchCenterY - initialPanY) * (zoomLevel / initialZoomLevel));
-
+                const newZoomLevel = Math.max(0.1, Math.min(5, initialZoomLevel * scaleFactor)); // Clamp zoom level
+                
+                // Only adjust pan if zoom level actually changed
+                if (newZoomLevel !== zoomLevel) {
+                    // Adjust pan to zoom around the pinch center relative to the image's current position
+                    panX = pinchCenterX - ((pinchCenterX - initialPanX) * (newZoomLevel / initialZoomLevel));
+                    panY = pinchCenterY - ((pinchCenterY - initialPanY) * (newZoomLevel / initialZoomLevel));
+                    zoomLevel = newZoomLevel; // Update zoomLevel after pan calculation
+                }
+                
             } else if (isDragging && e.touches.length === 1) {
                 const dx = e.touches[0].clientX - touchStartX;
                 const dy = e.touches[0].clientY - touchStartY;
@@ -2421,4 +2425,3 @@ To step into CAFS is to step into a garden of possibility—𝙬𝙝𝙚𝙧𝙚
     </script>
 </body>
 </html>
- 
